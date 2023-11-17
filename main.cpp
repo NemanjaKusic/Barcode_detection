@@ -1,0 +1,11 @@
+#include "vp.hpp"
+
+using namespace sc_core;
+
+int sc_main(int argc, char* argv[])
+{
+    Vp vp("Virtual Platform");
+    sc_start(1000, SC_NS);
+    
+    return 0;
+}  
