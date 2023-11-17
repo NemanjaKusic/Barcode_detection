@@ -12,7 +12,7 @@
 class Vp :  public sc_core::sc_module
 {
 	public:
-		Vp(sc_core::sc_module_name name,char** strings, int argv);
+		Vp(sc_core::sc_module_name name);
 		~Vp();
 
 	protected:

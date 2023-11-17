@@ -10,3 +10,5 @@ class Soft : public sc_core::sc_module
 	    Soft(sc_core::sc_module_name name);
 	    ~Soft();
 };
+
+#endif
