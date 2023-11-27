@@ -3,9 +3,10 @@
 Bram::Bram(sc_core::sc_module_name name) : sc_module(name)
 {
 	bram_socket_1.register_b_transport(this, &Bram::b_transport);
+	bram_socket_2.register_b_transport(this, &Bram::b_transport);
 	SC_REPORT_INFO("BRAM", "Constructed.");
 	
-	mem.reserve(10);
+	mem.reserve(20);
 }
 
 Bram::~Bram()

@@ -3,6 +3,7 @@
 
 #include <systemc>
 #include <iostream>
+#include <vector>
 
 #include <tlm>
 #include <tlm_utils/simple_target_socket.h>
