@@ -16,6 +16,7 @@ Soft::~Soft()
 
 void Soft::soft()
 {
+/*
 	unsigned char example[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 	write_bram(0, example, 10);
@@ -50,7 +51,55 @@ void Soft::soft()
         	std::cout << static_cast<int>(response2[i]) << " ";  // Convert to int for proper printing
 	}
 	
+*/
 
+	int ready = 1;
+	bool done = 0;
+	
+	unsigned char example[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	
+	while(!done)
+	{
+		if(ready)
+		{
+			write_bram(0, example, 10);
+			
+			std::cout << std::endl;
+	
+			for (int i = 0; i < 10; ++i) 
+			{
+        			std::cout << static_cast<int>(example[i]) << " ";  // Convert to int for proper printing
+			}
+
+    			std::cout << std::endl;
+			
+			write_hard(ADDR_START,1);
+		}
+		
+		while(ready)
+		{
+		        ready = read_hard(ADDR_READY);
+		        if (!ready)
+		        	write_hard(ADDR_START,0);
+		}
+		cout << endl << "while(ready) loop exited" << endl;
+		
+
+			
+		done = 1;
+
+	}
+	
+	cout << endl << "while(!done) loop exited" << endl;
+	
+	unsigned char response[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	read_bram(10, response, 10);
+	
+	for (int i = 0; i < 10; ++i) 
+	{
+        	std::cout << static_cast<int>(response[i]) << " ";  // Convert to int for proper printing
+	}
  
 }
 
