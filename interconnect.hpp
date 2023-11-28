@@ -5,6 +5,7 @@
 #include <systemc>
 #include <string>
 
+#include "addr.hpp"
 
 #include <tlm>
 #include <tlm_utils/simple_target_socket.h>

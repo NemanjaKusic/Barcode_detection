@@ -4,6 +4,9 @@
 #include <iostream>
 #include <systemc>
 
+#include "addr.hpp"
+#include "functions.hpp"
+
 #include <tlm>
 #include <tlm_utils/simple_target_socket.h>
 #include <tlm_utils/simple_initiator_socket.h>
@@ -26,6 +29,10 @@ class Ip_hard : public sc_core::sc_module
 		pl_t pl;
 		sc_core::sc_time offset;
 		
+		sc_dt::sc_uint<1> start;
+		sc_dt::sc_uint<1> ready;
+		
+		void b_transport(pl_t&, sc_core::sc_time&);	
 		void easy_function();
 	
 		void write_bram(sc_dt::uint64 addr,unsigned char *val,int length);

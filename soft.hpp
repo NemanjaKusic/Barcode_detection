@@ -4,6 +4,9 @@
 #include <iostream>
 #include <systemc>
 
+#include "addr.hpp"
+#include "functions.hpp"
+
 #include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
 
@@ -25,6 +28,8 @@ class Soft : public sc_core::sc_module
 		void soft();
 		void write_bram(sc_dt::uint64 addr,unsigned char *val,int length);
 		void read_bram(sc_dt::uint64 addr, unsigned char *val, int length);
+		int read_hard(sc_dt::uint64 addr);
+	    	void write_hard(sc_dt::uint64 addr,int val);
 };
 
 #endif
