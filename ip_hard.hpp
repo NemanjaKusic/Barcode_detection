@@ -33,7 +33,7 @@ class Ip_hard : public sc_core::sc_module
 		sc_dt::sc_uint<1> ready;
 		
 		void b_transport(pl_t&, sc_core::sc_time&);	
-		void easy_function();
+		void easy_function(sc_core::sc_time &);
 	
 		void write_bram(sc_dt::uint64 addr,unsigned char *val,int length);
 		void read_bram(sc_dt::uint64 addr, unsigned char *val, int length);

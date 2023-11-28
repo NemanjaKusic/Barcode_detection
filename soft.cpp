@@ -40,6 +40,17 @@ void Soft::soft()
 	start = read_hard(ADDR_START);
 	
 	cout << "start bit is " << start << endl;
+	
+	unsigned char response2[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	read_bram(10, response2, 10);
+	
+	for (int i = 0; i < 10; ++i) 
+	{
+        	std::cout << static_cast<int>(response2[i]) << " ";  // Convert to int for proper printing
+	}
+	
+
  
 }
 

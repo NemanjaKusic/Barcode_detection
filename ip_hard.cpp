@@ -1,6 +1,6 @@
 #include "ip_hard.hpp"
 
-Ip_hard::Ip_hard(sc_core::sc_module_name name): sc_module(name)
+Ip_hard::Ip_hard(sc_core::sc_module_name name): sc_module(name), ready(1)
 {
 	interconnect_socket.register_b_transport(this, &Ip_hard::b_transport);
 		
@@ -30,6 +30,7 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 			case ADDR_START:
 				start = toInt(buf);
 				cout << endl << "start bit = " << start << endl;
+				easy_function(offset);
 				break;
 			case ADDR_READY:
 				ready = toInt(buf);
@@ -63,17 +64,27 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 }
 
-void Ip_hard::easy_function(){
-	unsigned char myArray[10];
-	
-	read_bram(0, myArray, 10);
-	
-	for(int i=0; i < 10; i++ )
+void Ip_hard::easy_function(sc_core::sc_time &){
+	if(start == 1 && ready == 1)
 	{
-		myArray[i] += 1;
-	}
+		cout << "easy function started" << endl;
+		
+		unsigned char myArray[10];
 	
-	write_bram(10, myArray, 10);
+		read_bram(0, myArray, 10);
+	
+		for(int i=0; i < 10; i++ )
+		{
+			myArray[i] += 1;
+		}
+	
+		
+		
+		write_bram(10, myArray, 10);
+		ready = 0;
+		
+		cout << "easy function finished" << endl;
+	}
 }
 
 void Ip_hard::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
