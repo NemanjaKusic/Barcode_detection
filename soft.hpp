@@ -3,12 +3,19 @@
 
 #include <iostream>
 #include <systemc>
+ 
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp> 
+#include <opencv2/highgui.hpp> 
 
 #include "addr.hpp"
 #include "functions.hpp"
 
 #include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
+
+using namespace cv;
+using namespace std;
 
 class Soft : public sc_core::sc_module
 {

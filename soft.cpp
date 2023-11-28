@@ -1,6 +1,7 @@
 #include "soft.hpp"
 
 
+
 SC_HAS_PROCESS(Soft);
 
 Soft::Soft(sc_core::sc_module_name name) : sc_module(name),  offset(sc_core::SC_ZERO_TIME)
@@ -52,7 +53,7 @@ void Soft::soft()
 	}
 	
 */
-
+/*
 	int ready = 1;
 	bool done = 0;
 	
@@ -100,7 +101,141 @@ void Soft::soft()
 	{
         	std::cout << static_cast<int>(response[i]) << " ";  // Convert to int for proper printing
 	}
- 
+*/
+
+	//load picture
+	Mat image = imread("../slike/barkod_3b.jpg");	
+	//Mat image = imread(argv[i], IMREAD_COLOR);
+
+	SC_REPORT_INFO("CPU", "Loaded image from file.");
+    
+	//turn to grayscale
+	Mat gray;
+	cvtColor(image, gray, COLOR_BGR2GRAY);
+	
+	// Resize the image to 600x450
+	Mat resizedGray;
+	resize(gray, resizedGray, cv::Size(600, 450));
+	/*
+	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
+		   				
+			for (int j = 0; j < IMG_ROWS; j++)
+			{
+				for (int k = 0; k < IMG_COLS; k++)
+				{
+					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
+				}
+			}
+			
+			//Write image in bram 
+			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
+			
+			cout << "array of pixels of an image:" << endl;
+			
+			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+			{
+        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
+			}
+			delete[] img;
+	*/
+	
+	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
+		   				
+			for (int j = 0; j < IMG_ROWS; j++)
+			{
+				for (int k = 0; k < IMG_COLS; k++)
+				{
+					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
+				}
+			}
+			
+			//Write image in bram 
+			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
+			
+			cout << "array of pixels of an image:" << endl;
+			
+			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+			{
+        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
+			}
+			delete[] img;
+			
+		
+			
+			
+			unsigned char *response_img = new unsigned char[IMG_ROWS * IMG_COLS];
+			
+			
+			cout << endl << "ovde se pojavi segmentation fault" << endl;
+			read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
+	
+			cout << "array of pixels of response_img:" << endl;
+			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+			{
+        			std::cout << static_cast<int>(response_img[i]) << " ";  // Convert to int for proper printing
+			}
+	
+			delete[] response_img;
+	
+	/*
+	int ready = 1;
+	bool done = 0;
+	
+	while(!done)
+	{
+		
+		if(ready)
+		{
+			unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
+		   				
+			for (int j = 0; j < IMG_ROWS; j++)
+			{
+				for (int k = 0; k < IMG_COLS; k++)
+				{
+					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
+				}
+			}
+			
+			//Write image in bram 
+			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
+			
+			cout << "array of pixels of an image:" << endl;
+			
+			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+			{
+        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
+			}
+			delete[] img;
+		}
+			
+		while(ready)
+		{
+		        ready = read_hard(ADDR_READY);
+		        if (!ready)
+		        	write_hard(ADDR_START,0);
+		}
+		
+		cout << endl << "while(ready) loop exited" << endl;
+			
+		done = 1;
+		
+	}
+
+	cout << endl << "while(!done) loop exited" << endl;
+	
+	unsigned char *response_img = new unsigned char[IMG_ROWS * IMG_COLS];	
+	//unsigned char response_img[IMG_ROWS * IMG_COLS];
+	
+	read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
+	
+	cout << "array of pixels of response_img:" << endl;
+	for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+	{
+        	std::cout << static_cast<int>(response_img[i]) << " ";  // Convert to int for proper printing
+	}
+	
+	delete[] response_img;
+        */
 }
 
 void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)

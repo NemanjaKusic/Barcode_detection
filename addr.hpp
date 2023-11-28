@@ -6,8 +6,11 @@
 
 #define DELAY 10
 
-//bram size is 20 bytes 
-#define BRAM_SIZE 0x14  
+#define IMG_COLS 600
+#define IMG_ROWS 450
+
+//bram size is 1MB for now 
+#define BRAM_SIZE 0xF4240 
 
 //registers in ip_hard
 #define ADDR_START 0x00

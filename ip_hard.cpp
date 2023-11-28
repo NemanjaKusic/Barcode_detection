@@ -65,23 +65,27 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 }
 
 void Ip_hard::easy_function(sc_core::sc_time &){
+
 	if(start == 1 && ready == 1)
 	{
 		cout << "easy function started" << endl;
 		
-		unsigned char myArray[10];
+		unsigned char *myArray = new unsigned char[IMG_ROWS * IMG_COLS];
+		//unsigned char myArray[IMG_ROWS*IMG_COLS];
 	
-		read_bram(0, myArray, 10);
+		read_bram(0, myArray, IMG_ROWS*IMG_COLS);
 	
-		for(int i=0; i < 10; i++ )
+		for(int i=0; i < IMG_ROWS*IMG_COLS; i++ )
 		{
 			myArray[i] += 1;
 		}
 	
 		
 		
-		write_bram(10, myArray, 10);
+		write_bram(IMG_ROWS*IMG_COLS, myArray, IMG_ROWS*IMG_COLS);
+		delete[] myArray;	
 		ready = 0;
+
 		
 		cout << "easy function finished" << endl;
 	}
