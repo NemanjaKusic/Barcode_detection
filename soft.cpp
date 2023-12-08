@@ -138,7 +138,7 @@ void Soft::soft()
 			}
 			delete[] img;
 	*/
-	
+	/*
 	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
 		   				
 			for (int j = 0; j < IMG_ROWS; j++)
@@ -160,13 +160,14 @@ void Soft::soft()
 			}
 			delete[] img;
 			
-		
+			cout << endl;
+			write_hard(ADDR_START,1);
 			
 			
 			unsigned char *response_img = new unsigned char[IMG_ROWS * IMG_COLS];
 			
 			
-			cout << endl << "ovde se pojavi segmentation fault" << endl;
+			//cout << endl << "ovde se pojavi segmentation fault" << endl;
 			read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
 	
 			cout << "array of pixels of response_img:" << endl;
@@ -176,8 +177,8 @@ void Soft::soft()
 			}
 	
 			delete[] response_img;
-	
-	/*
+	*/
+
 	int ready = 1;
 	bool done = 0;
 	
@@ -206,6 +207,8 @@ void Soft::soft()
         			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
 			}
 			delete[] img;
+			
+			write_hard(ADDR_START, 1);
 		}
 			
 		while(ready)
@@ -235,7 +238,7 @@ void Soft::soft()
 	}
 	
 	delete[] response_img;
-        */
+        
 }
 
 void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
@@ -257,7 +260,8 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	pl_t pl;
 	
-	unsigned char buf[length];
+	//unsigned char buf[length];
+	unsigned char *buf = new unsigned char[length];
 	
 	pl.set_address(addr);
 	pl.set_data_length(length);
@@ -270,6 +274,8 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	{
 		val[i] = buf[i];
 	}
+	
+	delete[] buf;
 }
 
 void Soft::write_hard(sc_dt::uint64 addr,int val)

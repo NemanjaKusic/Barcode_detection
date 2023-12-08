@@ -110,7 +110,8 @@ void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	pl_t pl;
 	
-	unsigned char buf[length];
+	//unsigned char buf[length];
+	unsigned char *buf = new unsigned char[length];
 	
 	pl.set_address(addr);
 	pl.set_data_length(length);
@@ -123,6 +124,8 @@ void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	{
 		val[i] = buf[i];
 	}
+	
+	delete[] buf;
 }
 
 
