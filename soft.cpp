@@ -212,6 +212,24 @@ void Soft::soft()
 			}
 			delete[] img;
 			
+			write_hard(ADDR_X_Y, 1);
+			write_hard(ADDR_START, 1);
+		}
+			
+		while(ready)
+		{
+		        ready = read_hard(ADDR_READY);
+		        if (!ready)
+		        	write_hard(ADDR_START,0);
+		}
+		
+		ready = 1;
+		write_hard(ADDR_READY, 1);
+		
+		if(ready)
+		{
+			
+			write_hard(ADDR_X_Y, 0);
 			write_hard(ADDR_START, 1);
 		}
 			
@@ -230,33 +248,81 @@ void Soft::soft()
 
 	cout << endl << "while(!done) loop exited" << endl;
 	
-	unsigned char *response_img = new unsigned char[IMG_ROWS * IMG_COLS];	
-	//unsigned char response_img[IMG_ROWS * IMG_COLS];
+	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
+
+	read_bram(IMG_ROWS * IMG_COLS, response_img_1, 2 * IMG_ROWS * IMG_COLS);
 	
-	read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
-	
-	//Mat pic(450, 600, CV_8U, response_img);
-	
-	cout << "array of pixels of response_img:" << endl;
-	for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
+	cout << "array of pixels of response_img_1:" << endl;
+	for (int i = 0; i < 2 * IMG_ROWS * IMG_COLS; ++i) 
 	{
-        	std::cout << static_cast<int>(response_img[i]) << " ";  // Convert to int for proper printing
+        	std::cout << static_cast<int>(response_img_1[i]) << " ";  // Convert to int for proper printing
 	}
 	
-	Mat pic(IMG_ROWS, IMG_COLS, CV_8U);
+	short *short_img_1 = new short[IMG_ROWS * IMG_COLS];
+	
+	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
+	{
+		short_img_1[i] = (static_cast<signed short>(response_img_1[2*i]) << 8) | response_img_1[2*i + 1];
+	}
+	
+	
+	
+	Mat gradX(IMG_ROWS, IMG_COLS, CV_16S);
 	
 	for (int j = 0; j < IMG_ROWS; j++)
 	{
 		for (int k = 0; k < IMG_COLS; k++)
 		{
-			pic.at<unsigned char>(j,k) = response_img[j * IMG_COLS + k];
+			gradX.at<short>(j,k) = short_img_1[j * IMG_COLS + k];
 		}
 	}
 	
-	delete[] response_img;
-	
-	imshow("pic", pic);
+	imshow("gradX", gradX);
 	waitKey(0);
+	
+	delete[] short_img_1;
+        delete[] response_img_1;
+        
+        
+        
+        
+        unsigned char *response_img_2 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
+
+	read_bram(3 * IMG_ROWS * IMG_COLS, response_img_2, 2 * IMG_ROWS * IMG_COLS);
+	
+	cout << "array of pixels of response_img_2:" << endl;
+	for (int i = 0; i < 2 * IMG_ROWS * IMG_COLS; ++i) 
+	{
+        	std::cout << static_cast<int>(response_img_2[i]) << " ";  // Convert to int for proper printing
+	}
+	
+	short *short_img_2 = new short[IMG_ROWS * IMG_COLS];
+	
+	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
+	{
+		short_img_2[i] = (static_cast<signed short>(response_img_2[2*i]) << 8) | response_img_2[2*i + 1];
+	}
+	
+	
+	
+	Mat gradY(IMG_ROWS, IMG_COLS, CV_16S);
+	
+	for (int j = 0; j < IMG_ROWS; j++)
+	{
+		for (int k = 0; k < IMG_COLS; k++)
+		{
+			gradY.at<short>(j,k) = short_img_2[j * IMG_COLS + k];
+		}
+	}
+	
+	imshow("gradY", gradY);
+	waitKey(0);
+	
+	delete[] short_img_2;
+        delete[] response_img_2;
+        
+        
+        
         
 }
 

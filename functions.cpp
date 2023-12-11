@@ -19,3 +19,9 @@ void toUchar(unsigned char *buf,int val)
     buf[2] = (char) (val >> 8);
     buf[3] = (char) (val);
 }
+
+void shortToUchar(unsigned char *buf,short val)
+{
+    buf[0] = (unsigned char) (val >> 8);
+    buf[1] = (unsigned char) (val);
+}

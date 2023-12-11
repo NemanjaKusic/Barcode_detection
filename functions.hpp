@@ -19,4 +19,6 @@ int toInt(unsigned char *buf);
 
 void toUchar(unsigned char *buf,int val);
 
+void shortToUchar(unsigned char *buf,short val);
+
 #endif
