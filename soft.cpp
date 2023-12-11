@@ -1,6 +1,19 @@
 #include "soft.hpp"
 
+#define TABLE_SIZE( X ) ( sizeof( (X) ) / sizeof( (X)[0] ) )
+#define ROUNDINT( F ) static_cast<int>( 0.5 + (F) )
 
+struct CompareContourAreas
+{	//todo very inefficient
+	static bool Asc(const std::vector< cv::Point>& contour1, const std::vector<cv::Point>& contour2) {
+		double i = fabs(cv::contourArea(cv::Mat(contour1)));
+		double j = fabs(cv::contourArea(cv::Mat(contour2)));
+		return (i < j);
+	}
+	static bool Desc(const std::vector< cv::Point>& contour1, const std::vector<cv::Point>& contour2) {
+		return Asc(contour2, contour1);
+	}
+};
 
 SC_HAS_PROCESS(Soft);
 
@@ -322,7 +335,106 @@ void Soft::soft()
         delete[] response_img_2;
         
         
-        
+        //oduzmi y_gradijent od x
+	Mat gradient(450, 600, CV_32F);
+	subtract(gradY, gradX, gradient);
+
+	//8-bitna osvetljenost
+	Mat grad;
+	convertScaleAbs(gradient, grad);
+
+	//zamutiti sliku
+	Mat blurred;
+	blur(grad, blurred, Size(9, 9));
+
+	//osvetljenost u 0 ili 255
+	Mat thresh;
+	threshold(blurred, thresh, 225, 255, THRESH_BINARY);
+
+	//da se prosire beli delovi slike
+	Mat kernel;
+	kernel = getStructuringElement(MORPH_RECT, Size(30, 7));
+	Mat closed;
+	morphologyEx(thresh, closed, MORPH_CLOSE, kernel);
+
+	//da nestanu tackice na slici i sl.
+	kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
+	erode(closed, closed, kernel, Point(-1, -1) , 4);
+	dilate(closed, closed, kernel, Point(-1, -1), 4);
+
+	//naci konture(tacnije ivice kontura-jer RETR_EXTERNAL)
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
+	findContours(closed, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+	//contours = moja_funkcija(closed, hierarchy);
+	/*
+	//naci najvecu konturu
+	sort(contours.begin(), contours.end(), Contour_Area);
+	vector<Point> c = contours[0];
+
+	RotatedRect rect;
+	rect = minAreaRect(c);
+
+	Mat box;
+	boxPoints(rect, box);
+	*/
+	/*
+	vector<Point> box;
+	boxPoints(rect, box);
+	
+	vector<Point2f> box(4);
+	rect.points(box.data());
+	*/
+	//nacrtati konture
+
+	std::sort(contours.begin(), contours.end(), CompareContourAreas::Desc);
+	const  std::vector< cv::Point >& biggestContour = contours[0];
+
+	//minAreaRect accepts only Point or Point2f, i.e. points of type CV_32S or CV_32F.
+	cv::RotatedRect rect = cv::minAreaRect(biggestContour);
+
+	//It seems cv::boxPoints() needs a cv::Mat as the OutputArray.
+		//The rows are the 4 points and the two columns are x and y.
+		//The function cv::boxPoints() finds the four vertices of a rotated rectangle. 
+		//This function is useful to draw the rectangle. 
+		//In C++, instead of using this function, you can directly use box.points() method. 
+	cv::Point2f vertices[4];
+	rect.points(vertices);
+
+	std::vector< std::vector< cv::Point > > contours2;
+	contours2.push_back(std::vector< cv::Point >());
+	std::vector< cv::Point >& vcBoxpoints = contours2.back();
+	for (int z = 0; z < TABLE_SIZE(vertices); z++)
+	{
+		const cv::Point2f& pf = vertices[z];
+		vcBoxpoints.push_back(cv::Point(ROUNDINT(pf.x), ROUNDINT(pf.y)));
+	} // for (;;)
+
+	Mat image_copy = image.clone();
+	cv::drawContours(image_copy, contours2, (-1), cv::Scalar(0, 255, 0), 3);
+
+	
+
+
+	/*
+	Mat image_copy = image.clone();
+	drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 3);
+	*/
+
+	
+	imshow("Image", image);
+	waitKey(0);
+/*
+	imshow("grad", grad);
+	waitKey(0);
+	imshow("thresh", thresh);
+	waitKey(0);
+	imshow("closed", closed);
+	waitKey(0);
+*/
+	imshow("image_copy", image_copy);
+	waitKey(0);
+	
         
 }
 

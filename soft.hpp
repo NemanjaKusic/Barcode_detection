@@ -32,6 +32,7 @@ class Soft : public sc_core::sc_module
 		pl_t pl;
 		sc_core::sc_time offset;
 		
+		
 		void soft();
 		void write_bram(sc_dt::uint64 addr,unsigned char *val,int length);
 		void read_bram(sc_dt::uint64 addr, unsigned char *val, int length);
