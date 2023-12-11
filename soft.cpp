@@ -116,6 +116,10 @@ void Soft::soft()
 	// Resize the image to 600x450
 	Mat resizedGray;
 	resize(gray, resizedGray, cv::Size(600, 450));
+	
+	imshow("resizedGray", resizedGray);
+	waitKey(0);
+	
 	/*
 	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
 		   				
@@ -231,13 +235,28 @@ void Soft::soft()
 	
 	read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
 	
+	//Mat pic(450, 600, CV_8U, response_img);
+	
 	cout << "array of pixels of response_img:" << endl;
 	for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
 	{
         	std::cout << static_cast<int>(response_img[i]) << " ";  // Convert to int for proper printing
 	}
 	
+	Mat pic(IMG_ROWS, IMG_COLS, CV_8U);
+	
+	for (int j = 0; j < IMG_ROWS; j++)
+	{
+		for (int k = 0; k < IMG_COLS; k++)
+		{
+			pic.at<unsigned char>(j,k) = response_img[j * IMG_COLS + k];
+		}
+	}
+	
 	delete[] response_img;
+	
+	imshow("pic", pic);
+	waitKey(0);
         
 }
 
