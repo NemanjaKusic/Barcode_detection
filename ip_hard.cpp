@@ -30,7 +30,7 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 			case ADDR_START:
 				start = toInt(buf);
 				cout << endl << "start bit = " << start << endl;
-				easy_function(offset);
+				sobel_function(offset);
 				break;
 			case ADDR_READY:
 				ready = toInt(buf);
@@ -71,7 +71,7 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 }
 
-void Ip_hard::easy_function(sc_core::sc_time &){
+void Ip_hard::sobel_function(sc_core::sc_time &){
 
 	if(start == 1 && ready == 1)
 	{
