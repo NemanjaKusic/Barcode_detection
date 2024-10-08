@@ -117,7 +117,7 @@ void Soft::soft()
 */
 
 	//load picture
-	Mat image = imread("../slike/barkod_3b.jpg");	
+	Mat image = imread("../data/barcode_3b.jpg");	
 	//Mat image = imread(argv[i], IMREAD_COLOR);
 
 	SC_REPORT_INFO("CPU", "Loaded image from file.");
@@ -335,58 +335,40 @@ void Soft::soft()
         delete[] response_img_2;
         
         
-        //oduzmi y_gradijent od x
+        //subtract gradY form gradX
 	Mat gradient(450, 600, CV_32F);
 	subtract(gradY, gradX, gradient);
 
-	//8-bitna osvetljenost
+	//8-bit brightness
 	Mat grad;
 	convertScaleAbs(gradient, grad);
 
-	//zamutiti sliku
+	//blur the image
 	Mat blurred;
 	blur(grad, blurred, Size(9, 9));
 
-	//osvetljenost u 0 ili 255
+	//brightness can be 0 or 255
 	Mat thresh;
 	threshold(blurred, thresh, 225, 255, THRESH_BINARY);
 
-	//da se prosire beli delovi slike
+	//to expand the white parts of the image
 	Mat kernel;
 	kernel = getStructuringElement(MORPH_RECT, Size(30, 7));
 	Mat closed;
 	morphologyEx(thresh, closed, MORPH_CLOSE, kernel);
 
-	//da nestanu tackice na slici i sl.
+	//to make the dots in the picture disappear
 	kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
 	erode(closed, closed, kernel, Point(-1, -1) , 4);
 	dilate(closed, closed, kernel, Point(-1, -1), 4);
 
-	//naci konture(tacnije ivice kontura-jer RETR_EXTERNAL)
+	//find contours (more precisely contour edges - because RETR_EXTERNAL)
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 	findContours(closed, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-	//contours = moja_funkcija(closed, hierarchy);
-	/*
-	//naci najvecu konturu
-	sort(contours.begin(), contours.end(), Contour_Area);
-	vector<Point> c = contours[0];
 
-	RotatedRect rect;
-	rect = minAreaRect(c);
-
-	Mat box;
-	boxPoints(rect, box);
-	*/
-	/*
-	vector<Point> box;
-	boxPoints(rect, box);
+	//draw contours
 	
-	vector<Point2f> box(4);
-	rect.points(box.data());
-	*/
-	//nacrtati konture
-
 	std::sort(contours.begin(), contours.end(), CompareContourAreas::Desc);
 	const  std::vector< cv::Point >& biggestContour = contours[0];
 
