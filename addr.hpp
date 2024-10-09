@@ -8,9 +8,14 @@
 
 #define IMG_COLS 600
 #define IMG_ROWS 450
+#define STRIPE_COLS 600
+#define STRIPE_ROWS 90 
 
 //bram size is 1.5MB for now 
-#define BRAM_SIZE 0x16E360 
+//#define BRAM_SIZE 0x16E360 
+
+//bram size is 270KB
+#define BRAM_SIZE 0x41EB0
 
 //registers in ip_hard
 #define ADDR_START 0x00

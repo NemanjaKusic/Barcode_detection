@@ -121,35 +121,43 @@ void Soft::soft()
 	int ready = 1;
 	bool done = 0;
 	bool x_y = 1; 
+	int stripe = 0;
 	
-	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];
-	unsigned char *response_img_2 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
+	short *response_img_1 = new short[IMG_ROWS * IMG_COLS];
+	short *response_img_2 = new short[IMG_ROWS * IMG_COLS];
 	
+	unsigned char *response_stripe_1 = new unsigned char[2 * STRIPE_ROWS * IMG_COLS];
+	unsigned char *response_stripe_2 = new unsigned char[2 * STRIPE_ROWS * IMG_COLS];	
+	
+	short *short_response_stripe_1 = new short[STRIPE_ROWS * IMG_COLS];
+	short *short_response_stripe_2 = new short[STRIPE_ROWS * IMG_COLS];
 	while(!done)
 	{
 		
 		if(ready)
 		{
-			unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
+			unsigned char *img = new unsigned char[STRIPE_ROWS * IMG_COLS];
 		   				
-			for (int j = 0; j < IMG_ROWS; j++)
+			for (int j = 0; j < STRIPE_ROWS; j++)
 			{
 				for (int k = 0; k < IMG_COLS; k++)
 				{
-					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
+					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j + stripe*STRIPE_ROWS, k);
 				}
 			}
 			
 			//Write image in bram 
-			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
+			write_bram(VP_ADDR_BRAM_L, img, STRIPE_ROWS * IMG_COLS);
 			
 			cout << "array of pixels of an image:" << endl;
-			
+			/*
 			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
 			{
         			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
 			}
+			*/
 			delete[] img;
+			
 			
 			//write_hard(ADDR_X_Y, 1);
 			write_hard(ADDR_START, 1);
@@ -175,7 +183,7 @@ void Soft::soft()
 		}
 		
 		//later on if(x_y && last stripe)
-		if(!x_y)
+		if(!x_y && stripe == 4)
 		{
 			done = 1;
 		}
@@ -188,13 +196,54 @@ void Soft::soft()
 			{
 				x_y = !x_y;	
 	
-				read_bram(IMG_ROWS * IMG_COLS, response_img_1, 2 * IMG_ROWS * IMG_COLS);
+				read_bram(STRIPE_ROWS * IMG_COLS, response_stripe_1, 2 * STRIPE_ROWS * IMG_COLS);
+				
+				
+				
+				for(int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)
+				{
+					short_response_stripe_1[i] = (static_cast<signed short>(response_stripe_1[2*i]) << 8) | response_stripe_1[2*i + 1];
+				}
+				
+				
+				
+				for(int i = 0; i < STRIPE_ROWS; i++)
+				{
+					for(int j = 0; j < STRIPE_COLS; j++)
+					{
+						response_img_1[stripe * STRIPE_ROWS * STRIPE_COLS + i * STRIPE_COLS + j] = short_response_stripe_1[i * STRIPE_COLS + j];
+					}
+				}
+				
+				
+				
 			}
 			else if(!x_y)
 			{
 				x_y = !x_y;
 
-				read_bram(3 * IMG_ROWS * IMG_COLS, response_img_2, 2 * IMG_ROWS * IMG_COLS);
+				read_bram(3 * STRIPE_ROWS * IMG_COLS, response_stripe_2, 2 * STRIPE_ROWS * IMG_COLS);
+				
+
+				
+				for(int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)
+				{
+					short_response_stripe_2[i] = (static_cast<signed short>(response_stripe_2[2*i]) << 8) | response_stripe_2[2*i + 1];
+				}
+				
+				
+				
+				for(int i = 0; i < STRIPE_ROWS; i++)
+				{
+					for(int j = 0; j < STRIPE_COLS; j++)
+					{
+						response_img_2[stripe * STRIPE_ROWS * STRIPE_COLS + i * STRIPE_COLS + j] = short_response_stripe_2[i * STRIPE_COLS + j];
+					}
+				}
+				
+				cout << endl << "stripe: " << stripe << " done" << endl; 
+				
+				stripe++;
 			}			
 		}
 		
@@ -204,7 +253,24 @@ void Soft::soft()
 		
 	}
 
+	delete[] response_stripe_1;
+	delete[] response_stripe_2;
+	
+	delete[] short_response_stripe_1;
+	delete[] short_response_stripe_2;
+	
+	//delete[] response_img_1;
+	//delete[] response_img_2;
+	
 	cout << endl << "while(!done) loop exited" << endl;
+	
+	
+	
+	
+	
+	
+	
+	
 	/*
 	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
 
@@ -216,31 +282,34 @@ void Soft::soft()
         	std::cout << static_cast<int>(response_img_1[i]) << " ";  // Convert to int for proper printing
 	}
 	*/
+	/*
 	short *short_img_1 = new short[IMG_ROWS * IMG_COLS];
 	
 	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
 	{
 		short_img_1[i] = (static_cast<signed short>(response_img_1[2*i]) << 8) | response_img_1[2*i + 1];
 	}
+	*/
 	
-	
-	
+//ovo treba
+
 	Mat gradX(IMG_ROWS, IMG_COLS, CV_16S);
 	
 	for (int j = 0; j < IMG_ROWS; j++)
 	{
 		for (int k = 0; k < IMG_COLS; k++)
 		{
-			gradX.at<short>(j,k) = short_img_1[j * IMG_COLS + k];
+			gradX.at<short>(j,k) = response_img_1[j * IMG_COLS + k];
 		}
 	}
 	
 	imshow("gradX", gradX);
 	waitKey(0);
 	
-	delete[] short_img_1;
+	//delete[] short_img_1;
         delete[] response_img_1;
         
+     
         
         
         /*
@@ -254,14 +323,18 @@ void Soft::soft()
         	std::cout << static_cast<int>(response_img_2[i]) << " ";  // Convert to int for proper printing
 	}
 	*/
+	/*
 	short *short_img_2 = new short[IMG_ROWS * IMG_COLS];
 	
 	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
 	{
 		short_img_2[i] = (static_cast<signed short>(response_img_2[2*i]) << 8) | response_img_2[2*i + 1];
 	}
-	
-	
+	*/
+
+//ovo treba	
+
+
 	
 	Mat gradY(IMG_ROWS, IMG_COLS, CV_16S);
 	
@@ -269,17 +342,17 @@ void Soft::soft()
 	{
 		for (int k = 0; k < IMG_COLS; k++)
 		{
-			gradY.at<short>(j,k) = short_img_2[j * IMG_COLS + k];
+			gradY.at<short>(j,k) = response_img_2[j * IMG_COLS + k];
 		}
 	}
 	
 	imshow("gradY", gradY);
 	waitKey(0);
 	
-	delete[] short_img_2;
+	//delete[] short_img_2;
         delete[] response_img_2;
         
-        
+       
         //subtract gradY form gradX
 	Mat gradient(450, 600, CV_32F);
 	subtract(gradY, gradX, gradient);
@@ -342,26 +415,14 @@ void Soft::soft()
 
 	
 
-
-	/*
-	Mat image_copy = image.clone();
-	drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 3);
-	*/
-
 	
 	imshow("Image", image);
 	waitKey(0);
-/*
-	imshow("grad", grad);
-	waitKey(0);
-	imshow("thresh", thresh);
-	waitKey(0);
-	imshow("closed", closed);
-	waitKey(0);
-*/
+
 	imshow("image_copy", image_copy);
 	waitKey(0);
-	
+
+
         
 }
 

@@ -100,10 +100,10 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		delete[] myArray;
 		*/
 		
-		unsigned char *myArray = new unsigned char[IMG_ROWS * IMG_COLS];
-		read_bram(0, myArray, IMG_ROWS*IMG_COLS);
+		unsigned char *myArray = new unsigned char[STRIPE_ROWS * IMG_COLS];
+		read_bram(0, myArray, STRIPE_ROWS*IMG_COLS);
 		
-		short *output = new short[IMG_ROWS * IMG_COLS];
+		short *output = new short[STRIPE_ROWS * IMG_COLS];
 		
 		int pos = 0;
 		short sum = 0;
@@ -128,7 +128,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 
 		
 
-		for (int i = 0; i < IMG_ROWS; i++)//loop for rows// 
+		for (int i = 0; i < STRIPE_ROWS; i++)//loop for rows// 
 		{
 		        for (int j = 0; j < IMG_COLS; j++)//loop for columns// 
 		        {
@@ -146,7 +146,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 							j += 2;
 							slucaj_2 = 1;
 						}
-						if((i+h-1) >= IMG_ROWS)
+						if((i+h-1) >= STRIPE_ROWS)
 						{
 							i -= 2*IMG_COLS;
 							slucaj_3 = 1;
@@ -203,11 +203,11 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 
 		if(x_y)
 		{
-			write_bram(IMG_ROWS*IMG_COLS, output, IMG_ROWS*IMG_COLS);
+			write_bram(STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
 		}
 		else
 		{	
-			write_bram(3 * IMG_ROWS*IMG_COLS, output, IMG_ROWS*IMG_COLS);
+			write_bram(3 * STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
 		}
 		delete[] output;
 		ready = 1;
@@ -223,7 +223,7 @@ void Ip_hard::write_bram(sc_dt::uint64 addr,short *val,int length)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	
 	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
-	unsigned char *out = static_cast<unsigned char*>(malloc(2 * IMG_ROWS * IMG_COLS));
+	unsigned char *out = static_cast<unsigned char*>(malloc(2 * STRIPE_ROWS * IMG_COLS));
 
 	unsigned char buf[2];
 	for(int i = 0; i < length; i++)
