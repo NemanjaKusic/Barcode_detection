@@ -1,5 +1,9 @@
 #include "soft.hpp"
 
+int argc;
+char** data;
+//char* data[];
+
 #define TABLE_SIZE( X ) ( sizeof( (X) ) / sizeof( (X)[0] ) )
 #define ROUNDINT( F ) static_cast<int>( 0.5 + (F) )
 
@@ -17,10 +21,12 @@ struct CompareContourAreas
 
 SC_HAS_PROCESS(Soft);
 
-Soft::Soft(sc_core::sc_module_name name) : sc_module(name),  offset(sc_core::SC_ZERO_TIME)
+Soft::Soft(sc_core::sc_module_name name, int argc, char* argv[]) : sc_module(name),  offset(sc_core::SC_ZERO_TIME)
 {
 	 SC_THREAD(soft);
 	 SC_REPORT_INFO("Soft", "Constructed.");
+	 argc = argc;
+	 data = argv;
 }
 
 Soft::~Soft()
@@ -117,8 +123,8 @@ void Soft::soft()
 */
 
 	//load picture
-	Mat image = imread("../data/barcode_3b.jpg");	
-	//Mat image = imread(argv[i], IMREAD_COLOR);
+	//Mat image = imread("../data/barcode_3b.jpg");	
+	Mat image = imread(data[1], IMREAD_COLOR);
 
 	SC_REPORT_INFO("CPU", "Loaded image from file.");
     

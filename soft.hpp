@@ -20,7 +20,7 @@ using namespace std;
 class Soft : public sc_core::sc_module
 {
 	public:
-		Soft(sc_core::sc_module_name name);
+		Soft(sc_core::sc_module_name name, int argc, char** argv);
 		~Soft();
 	    
 		tlm_utils::simple_initiator_socket<Soft> interconnect_socket;

@@ -7,7 +7,7 @@ LIBS = `pkg-config opencv4 --cflags --libs`
 $(PROJECT) : $(SRC)
 	$(CC) -g -lsystemc $(SRC) -o $(PROJECT) $(LIBS) 
 run:  
-	./$(PROJECT)
+	./$(PROJECT) ../data/barcode_01.jpg
 	
 clean:
 	rm output

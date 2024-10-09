@@ -1,8 +1,8 @@
 #include "vp.hpp"
 
-Vp::Vp(sc_core::sc_module_name name) :
+Vp::Vp(sc_core::sc_module_name name, int argc, char** argv) :
 	sc_module (name),
-	soft("Soft"),
+	soft("Soft", argc, argv),
 	interconnect("Interconnect"),
 	ip_hard("Ip_hard"),
 	bram("Bram")
