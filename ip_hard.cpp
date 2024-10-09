@@ -75,6 +75,11 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 
 	if(start == 1 && ready == 1)
 	{
+		ready = 0;
+		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+	}
+	else if(start == 0 && ready == 0)
+	{
 		cout << "easy function started" << endl;
 		
 		
@@ -205,10 +210,10 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 			write_bram(3 * IMG_ROWS*IMG_COLS, output, IMG_ROWS*IMG_COLS);
 		}
 		delete[] output;
-		ready = 0;
+		ready = 1;
 
 			
-		cout << "easy function finished" << endl;
+		cout << "sobel function finished" << endl;
 	}
 }
 

@@ -36,91 +36,7 @@ Soft::~Soft()
 
 void Soft::soft()
 {
-/*
-	unsigned char example[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-	write_bram(0, example, 10);
-	
-	unsigned char response[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	
-	read_bram(0, response, 10);
-	
-	std::cout << std::endl;
-	
-	for (int i = 0; i < 10; ++i) 
-	{
-        	std::cout << static_cast<int>(response[i]) << " ";  // Convert to int for proper printing
-	}
-
-    	std::cout << std::endl;
-	
-	write_hard(ADDR_START,1);
-	
-	int start = 0;
-	
-	start = read_hard(ADDR_START);
-	
-	cout << "start bit is " << start << endl;
-	
-	unsigned char response2[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	
-	read_bram(10, response2, 10);
-	
-	for (int i = 0; i < 10; ++i) 
-	{
-        	std::cout << static_cast<int>(response2[i]) << " ";  // Convert to int for proper printing
-	}
-	
-*/
-/*
-	int ready = 1;
-	bool done = 0;
-	
-	unsigned char example[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	
-	while(!done)
-	{
-		if(ready)
-		{
-			write_bram(0, example, 10);
-			
-			std::cout << std::endl;
-	
-			for (int i = 0; i < 10; ++i) 
-			{
-        			std::cout << static_cast<int>(example[i]) << " ";  // Convert to int for proper printing
-			}
-
-    			std::cout << std::endl;
-			
-			write_hard(ADDR_START,1);
-		}
-		
-		while(ready)
-		{
-		        ready = read_hard(ADDR_READY);
-		        if (!ready)
-		        	write_hard(ADDR_START,0);
-		}
-		cout << endl << "while(ready) loop exited" << endl;
-		
-
-			
-		done = 1;
-
-	}
-	
-	cout << endl << "while(!done) loop exited" << endl;
-	
-	unsigned char response[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	
-	read_bram(10, response, 10);
-	
-	for (int i = 0; i < 10; ++i) 
-	{
-        	std::cout << static_cast<int>(response[i]) << " ";  // Convert to int for proper printing
-	}
-*/
 
 	//load picture
 	//Mat image = imread("../data/barcode_3b.jpg");	
@@ -204,6 +120,10 @@ void Soft::soft()
 
 	int ready = 1;
 	bool done = 0;
+	bool x_y = 1; 
+	
+	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];
+	unsigned char *response_img_2 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
 	
 	while(!done)
 	{
@@ -231,7 +151,7 @@ void Soft::soft()
 			}
 			delete[] img;
 			
-			write_hard(ADDR_X_Y, 1);
+			//write_hard(ADDR_X_Y, 1);
 			write_hard(ADDR_START, 1);
 		}
 			
@@ -239,34 +159,53 @@ void Soft::soft()
 		{
 		        ready = read_hard(ADDR_READY);
 		        if (!ready)
-		        	write_hard(ADDR_START,0);
+		        {
+		        	if(x_y)
+		        	{
+		        		write_hard(ADDR_X_Y, 1);
+		        		write_hard(ADDR_START,0);
+		        	}
+		        	else if(!x_y)
+		        	{
+					write_hard(ADDR_X_Y, 0);
+		        		write_hard(ADDR_START,0);		        		
+		        	}
+		        	//x_y = !x_y;
+		        }
 		}
 		
-		ready = 1;
-		write_hard(ADDR_READY, 1);
+		//later on if(x_y && last stripe)
+		if(!x_y)
+		{
+			done = 1;
+		}
+		
+		ready = read_hard(ADDR_READY);
 		
 		if(ready)
 		{
-			
-			write_hard(ADDR_X_Y, 0);
-			write_hard(ADDR_START, 1);
-		}
-			
-		while(ready)
-		{
-		        ready = read_hard(ADDR_READY);
-		        if (!ready)
-		        	write_hard(ADDR_START,0);
+			if(x_y)
+			{
+				x_y = !x_y;	
+	
+				read_bram(IMG_ROWS * IMG_COLS, response_img_1, 2 * IMG_ROWS * IMG_COLS);
+			}
+			else if(!x_y)
+			{
+				x_y = !x_y;
+
+				read_bram(3 * IMG_ROWS * IMG_COLS, response_img_2, 2 * IMG_ROWS * IMG_COLS);
+			}			
 		}
 		
 		cout << endl << "while(ready) loop exited" << endl;
 			
-		done = 1;
+		
 		
 	}
 
 	cout << endl << "while(!done) loop exited" << endl;
-	
+	/*
 	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
 
 	read_bram(IMG_ROWS * IMG_COLS, response_img_1, 2 * IMG_ROWS * IMG_COLS);
@@ -276,7 +215,7 @@ void Soft::soft()
 	{
         	std::cout << static_cast<int>(response_img_1[i]) << " ";  // Convert to int for proper printing
 	}
-	
+	*/
 	short *short_img_1 = new short[IMG_ROWS * IMG_COLS];
 	
 	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
@@ -304,7 +243,7 @@ void Soft::soft()
         
         
         
-        
+        /*
         unsigned char *response_img_2 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
 
 	read_bram(3 * IMG_ROWS * IMG_COLS, response_img_2, 2 * IMG_ROWS * IMG_COLS);
@@ -314,7 +253,7 @@ void Soft::soft()
 	{
         	std::cout << static_cast<int>(response_img_2[i]) << " ";  // Convert to int for proper printing
 	}
-	
+	*/
 	short *short_img_2 = new short[IMG_ROWS * IMG_COLS];
 	
 	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
