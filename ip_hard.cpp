@@ -107,7 +107,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		
 		int pos = 0;
 		short sum = 0;
-
+/*
 		char kernel1[3][3] = {
 		{-3, 0, 3},
 		{-10, 0 ,10},
@@ -119,7 +119,12 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		{0, 0, 0},
 		{3, 10, 3}
 		};
-
+*/
+		short kernel1[9] = {-3, 0, 3, -10, 0, 10, -3, 0, 3};
+		short kernel2[9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3};
+		
+		short const1[9] = {-601, -600, -599, -1, 0, 1, 599, 600, 601}; 
+		
 		unsigned char slucaj_1 = 0;
 		unsigned char slucaj_2 = 0;
 		unsigned char slucaj_3 = 0;
@@ -127,7 +132,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 
 
 		
-
+/*
 		for (int i = 0; i < STRIPE_ROWS; i++)//loop for rows// 
 		{
 		        for (int j = 0; j < IMG_COLS; j++)//loop for columns// 
@@ -192,11 +197,44 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 				}
 		               	//x = (float)slika_pikseli.at<float>(i, j);//storing value of (i,j) pixel in variable//
 		               	//cout << "Value of pixel" << "(" << i << "," << j << ")" << "=" << x << endl;//showing the values in console window//	
-				output[i * IMG_COLS + j] = sum;
-				
-		 		//cout << "Value of pixel" << "(" << i << "," << j << ")" << "=" << suma << endl;//showing the values in console window//
-			       	sum = 0;
-		        }
+
+*/		               	
+		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
+		{
+		        for(int k = 0; k < 9; k++)
+		        {
+				if(i < 601)
+				{
+					i += 2 * IMG_COLS;
+					slucaj_1 = 1;
+				}
+				if((i + 601) > (STRIPE_ROWS * IMG_COLS))
+				{
+					i -= 2 * IMG_COLS;
+					slucaj_2 = 1;
+				}
+				if(x_y)
+				{
+					sum += ((short)myArray[i + const1[k]] * (short)kernel1[k]);
+				}
+				else
+				{	
+					sum += ((short)myArray[i + const1[k]] * (short)kernel2[k]);
+				}
+				if(slucaj_1)
+				{
+					i -= 2 * IMG_COLS;
+					slucaj_1 = 0;
+				}					
+				if(slucaj_2)
+				{
+					i += 2 * IMG_COLS;
+					slucaj_2 = 0;
+				}
+			}
+			
+			output[i] = sum;
+			sum = 0;
 		}
 			
 		delete[] myArray;

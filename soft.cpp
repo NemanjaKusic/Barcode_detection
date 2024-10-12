@@ -357,17 +357,29 @@ void Soft::soft()
 	Mat gradient(450, 600, CV_32F);
 	subtract(gradY, gradX, gradient);
 
+	imshow("gradient", gradient);
+	waitKey(0);
+
 	//8-bit brightness
 	Mat grad;
 	convertScaleAbs(gradient, grad);
+	
+	imshow("grad", grad);
+	waitKey(0);
 
 	//blur the image
 	Mat blurred;
 	blur(grad, blurred, Size(9, 9));
+	
+	imshow("blurred", blurred);
+	waitKey(0);
 
 	//brightness can be 0 or 255
 	Mat thresh;
 	threshold(blurred, thresh, 225, 255, THRESH_BINARY);
+
+	imshow("thresh", thresh);
+	waitKey(0);
 
 	//to expand the white parts of the image
 	Mat kernel;
