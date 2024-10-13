@@ -124,12 +124,17 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		short kernel2[9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3};
 		
 		short const1[9] = {-601, -600, -599, -1, 0, 1, 599, 600, 601}; 
-		
+/*
 		unsigned char slucaj_1 = 0;
 		unsigned char slucaj_2 = 0;
 		unsigned char slucaj_3 = 0;
 		unsigned char slucaj_4 = 0;
+*/		
+		unsigned char case_1 = 0;
+		unsigned char case_2 = 0;
 
+		int addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9;
+		short res0, res1, res2, res3, res4, res5, res6, res7, res8, res9;
 
 		
 /*
@@ -201,37 +206,68 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 */		               	
 		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
 		{
-		        for(int k = 0; k < 9; k++)
-		        {
+		        
 				if(i < 601)
 				{
 					i += 2 * IMG_COLS;
-					slucaj_1 = 1;
+					case_1 = 1;
 				}
 				if((i + 601) > (STRIPE_ROWS * IMG_COLS))
 				{
 					i -= 2 * IMG_COLS;
-					slucaj_2 = 1;
+					case_2 = 1;
 				}
+				
+					//in parallel
+					addr1 = i + const1[0];
+					addr2 = i + const1[1];
+					addr3 = i + const1[2];
+					addr4 = i + const1[3];
+					addr5 = i + const1[4];
+					addr6 = i + const1[5];
+					addr7 = i + const1[6];
+					addr8 = i + const1[7];
+					addr9 = i + const1[8];
 				if(x_y)
 				{
-					sum += ((short)myArray[i + const1[k]] * (short)kernel1[k]);
+					//in parallel
+					res1 = ((short)myArray[addr1] * (short)kernel1[0]);
+					res2 = ((short)myArray[addr2] * (short)kernel1[1]);
+					res3 = ((short)myArray[addr3] * (short)kernel1[2]);
+					res4 = ((short)myArray[addr4] * (short)kernel1[3]);
+					//res5 = ((short)myArray[addr5] * (short)kernel1[4]);
+					res6 = ((short)myArray[addr6] * (short)kernel1[5]);
+					res7 = ((short)myArray[addr7] * (short)kernel1[6]);
+					res8 = ((short)myArray[addr8] * (short)kernel1[7]);
+					res9 = ((short)myArray[addr9] * (short)kernel1[8]);
+					
+					
 				}
 				else
 				{	
-					sum += ((short)myArray[i + const1[k]] * (short)kernel2[k]);
+					//in parallel
+					res1 = ((short)myArray[addr1] * (short)kernel2[0]);
+					res2 = ((short)myArray[addr2] * (short)kernel2[1]);
+					res3 = ((short)myArray[addr3] * (short)kernel2[2]);
+					res4 = ((short)myArray[addr4] * (short)kernel2[3]);
+					//res5 = ((short)myArray[addr5] * (short)kernel2[4]);
+					res6 = ((short)myArray[addr6] * (short)kernel2[5]);
+					res7 = ((short)myArray[addr7] * (short)kernel2[6]);
+					res8 = ((short)myArray[addr8] * (short)kernel2[7]);
+					res9 = ((short)myArray[addr9] * (short)kernel2[8]);
 				}
-				if(slucaj_1)
+					sum = ((res1+res2)+(res3+res4))+((res6+res7)+(res8+res9));	//res5 = 0
+				if(case_1)
 				{
 					i -= 2 * IMG_COLS;
-					slucaj_1 = 0;
+					case_1 = 0;
 				}					
-				if(slucaj_2)
+				if(case_2)
 				{
 					i += 2 * IMG_COLS;
-					slucaj_2 = 0;
+					case_2 = 0;
 				}
-			}
+			
 			
 			output[i] = sum;
 			sum = 0;
