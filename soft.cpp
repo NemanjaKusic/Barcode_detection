@@ -440,8 +440,8 @@ void Soft::soft()
 
 void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
 {
-	pl_t pl;
 	
+/*
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	
 	pl.set_data_length(length);
@@ -450,10 +450,59 @@ void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
 	pl.set_command(tlm::TLM_WRITE_COMMAND);
 	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
 	interconnect_socket->b_transport(pl,offset);
-}
+*/
 
+	pl_t pl;
+
+	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
+	
+	int div_four = 0;
+	unsigned char buf1[4];
+	
+	while(length % 4)
+	{
+		length++;
+		div_four ++;
+	}
+
+	unsigned char *buf = new unsigned char[length];
+	
+	for(int i = 0; i < length - div_four; i++)
+	{
+    		buf[i] = val[i];
+   	}
+  
+    	for(int i = length - div_four; i < length; i++)
+    	{
+    		buf[i] = 0;
+    	}
+
+
+   	 pl.set_data_length(BUS_WIDTH);
+    
+    	for(int j = 0; j < length / 4; j++)
+    	{
+    		int l = 0;
+    	
+    		for(int p = 4 * j; p < 4 + j *4; p++)
+    		{
+    			buf1[l] = buf[p];
+    			l++;
+    		}
+  
+		pl.set_address(VP_ADDR_BRAM_L + addr + j * 4);
+		pl.set_data_ptr(buf1);
+		pl.set_command(tlm::TLM_WRITE_COMMAND);
+		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+		interconnect_socket->b_transport(pl,offset);
+		
+    	}
+    	delete[] buf;
+}    
+    
 void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 {
+/*
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	pl_t pl;
 	
@@ -473,6 +522,58 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	}
 	
 	delete[] buf;
+*/
+	pl_t pl;
+
+	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
+	
+	unsigned char buf1[4];
+	int div_four = 4;
+	
+	//unsigned char *buf = new unsigned char[length];
+	
+	while(length % 4)
+	{
+		length++;
+		div_four--;
+	}
+	
+	pl.set_data_length(BUS_WIDTH);
+	
+	for(int i = 0; i < length / 4; i++)
+	{
+		pl.set_address(VP_ADDR_BRAM_L + addr + i * 4);
+		pl.set_data_ptr(buf1);
+		pl.set_command(tlm::TLM_READ_COMMAND);
+		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+		interconnect_socket->b_transport(pl,offset);
+		
+		int l = 0;
+		
+		if(i * 4 == (length - 4))
+		{
+			for(int p = 4 * i; p < div_four + i * 4; p++)
+    			{
+    				val[p] = buf1[l];
+    				l++;
+    			}
+		}
+		else
+		{
+			for(int p = 4 * i; p < 4 + i * 4; p++)
+    			{
+    				val[p] = buf1[l];
+    				l++;
+    			}
+    			
+		}
+	}
+	
+	//val = buf;
+	//delete[] buf;
+	
+	
+	
 }
 
 void Soft::write_hard(sc_dt::uint64 addr,int val)

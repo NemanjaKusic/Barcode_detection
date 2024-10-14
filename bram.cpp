@@ -32,7 +32,7 @@ void Bram::b_transport(pl_t &pl, sc_core::sc_time &offset)
 			
 			offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 			
-			SC_REPORT_INFO("BRAM", "Array stored in memory.");
+			//SC_REPORT_INFO("BRAM", "Array stored in memory.");
 			break;
 	
 		case tlm::TLM_READ_COMMAND:
@@ -44,7 +44,7 @@ void Bram::b_transport(pl_t &pl, sc_core::sc_time &offset)
 			
 			offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 			
-			SC_REPORT_INFO("BRAM", "Array extracted from memory.");
+			//SC_REPORT_INFO("BRAM", "Array extracted from memory.");
 			break;
 	
 		default:

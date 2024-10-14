@@ -21,15 +21,15 @@ void Interconnect::b_transport(pl_t &pl, sc_core::sc_time &offset)
 	if (addr >= VP_ADDR_BRAM_L && addr <= VP_ADDR_BRAM_H)
 	{
 		pl.set_address(temp_addr);
-		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
-		SC_REPORT_INFO("Interconnect", "Sent to bram.");
+		//offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+		//SC_REPORT_INFO("Interconnect", "Sent to bram.");
 		bram_socket->b_transport(pl, offset);
 		pl.set_address(addr);
 	}
 	else if (addr >= VP_ADDR_IP_HARD_L && addr <= VP_ADDR_IP_HARD_H)
 	{
 		pl.set_address(temp_addr);
-		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+		//offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 		SC_REPORT_INFO("Interconnect", "Sent to ip_hard.");
 		ip_hard_socket->b_transport(pl, offset);
 		pl.set_address(addr);
