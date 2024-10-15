@@ -9,7 +9,7 @@
 #define IMG_COLS 600
 #define IMG_ROWS 450
 #define STRIPE_COLS 600
-#define STRIPE_ROWS 90 
+#define STRIPE_ROWS 75 
 
 //bram size is 1.5MB for now 
 //#define BRAM_SIZE 0x16E360 

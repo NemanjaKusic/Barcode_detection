@@ -183,7 +183,7 @@ void Soft::soft()
 		}
 		
 		//later on if(x_y && last stripe)
-		if(!x_y && stripe == 4)
+		if(!x_y && stripe == 5)
 		{
 			done = 1;
 		}

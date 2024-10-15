@@ -100,10 +100,11 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		delete[] myArray;
 		*/
 		
-		unsigned char *myArray = new unsigned char[STRIPE_ROWS * IMG_COLS];
-		read_bram(0, myArray, STRIPE_ROWS*IMG_COLS);
+		//unsigned char *myArray = new unsigned char[STRIPE_ROWS * IMG_COLS];
+		//read_bram(0, myArray, STRIPE_ROWS*IMG_COLS);
 		
-		short *output = new short[STRIPE_ROWS * IMG_COLS];
+		//short *output = new short[STRIPE_ROWS * IMG_COLS];
+		short output[1];
 		
 		int pos = 0;
 		short sum = 0;
@@ -136,6 +137,10 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		int addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9;
 		short res0, res1, res2, res3, res4, res5, res6, res7, res8, res9;
 
+		unsigned char pixels1[4]; 
+		unsigned char pixels2[4];
+		unsigned char pixels3[4];
+		
 		
 /*
 		for (int i = 0; i < STRIPE_ROWS; i++)//loop for rows// 
@@ -220,16 +225,22 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 				
 					//in parallel
 					addr1 = i + const1[0];
-					addr2 = i + const1[1];
-					addr3 = i + const1[2];
+					//addr2 = i + const1[1];
+					//addr3 = i + const1[2];
 					addr4 = i + const1[3];
-					addr5 = i + const1[4];
-					addr6 = i + const1[5];
+					//addr5 = i + const1[4];
+					//addr6 = i + const1[5];
 					addr7 = i + const1[6];
-					addr8 = i + const1[7];
-					addr9 = i + const1[8];
+					//addr8 = i + const1[7];
+					//addr9 = i + const1[8];
+					
+				read_bram(addr1, pixels1, 4);
+				read_bram(addr4, pixels2, 4);
+				read_bram(addr7, pixels3, 4);
+				
 				if(x_y)
 				{
+				/*
 					//in parallel
 					res1 = ((short)myArray[addr1] * (short)kernel1[0]);
 					res2 = ((short)myArray[addr2] * (short)kernel1[1]);
@@ -240,11 +251,22 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 					res7 = ((short)myArray[addr7] * (short)kernel1[6]);
 					res8 = ((short)myArray[addr8] * (short)kernel1[7]);
 					res9 = ((short)myArray[addr9] * (short)kernel1[8]);
-					
+				*/	
+					//in parallel
+					res1 = ((short)pixels1[0] * (short)kernel1[0]);
+					res2 = ((short)pixels1[1] * (short)kernel1[1]);
+					res3 = ((short)pixels1[2] * (short)kernel1[2]);
+					res4 = ((short)pixels2[0] * (short)kernel1[3]);
+					//res5 = ((short)pixels2[1] * (short)kernel1[4]);
+					res6 = ((short)pixels2[2] * (short)kernel1[5]);
+					res7 = ((short)pixels3[0] * (short)kernel1[6]);
+					res8 = ((short)pixels3[1] * (short)kernel1[7]);
+					res9 = ((short)pixels3[2] * (short)kernel1[8]);
 					
 				}
 				else
 				{	
+				/*
 					//in parallel
 					res1 = ((short)myArray[addr1] * (short)kernel2[0]);
 					res2 = ((short)myArray[addr2] * (short)kernel2[1]);
@@ -255,8 +277,20 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 					res7 = ((short)myArray[addr7] * (short)kernel2[6]);
 					res8 = ((short)myArray[addr8] * (short)kernel2[7]);
 					res9 = ((short)myArray[addr9] * (short)kernel2[8]);
+				*/
+					//in parallel
+					res1 = ((short)pixels1[0] * (short)kernel2[0]);
+					res2 = ((short)pixels1[1] * (short)kernel2[1]);
+					res3 = ((short)pixels1[2] * (short)kernel2[2]);
+					res4 = ((short)pixels2[0] * (short)kernel2[3]);
+					//res5 = ((short)pixels2[1] * (short)kernel2[4]);
+					res6 = ((short)pixels2[2] * (short)kernel2[5]);
+					res7 = ((short)pixels3[0] * (short)kernel2[6]);
+					res8 = ((short)pixels3[1] * (short)kernel2[7]);
+					res9 = ((short)pixels3[2] * (short)kernel2[8]);
 				}
 					sum = ((res1+res2)+(res3+res4))+((res6+res7)+(res8+res9));	//res5 = 0
+					
 				if(case_1)
 				{
 					i -= 2 * IMG_COLS;
@@ -269,12 +303,19 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 				}
 			
 			
-			output[i] = sum;
-			sum = 0;
+				output[0] = sum;
+				if(x_y)
+				{
+					write_bram(STRIPE_ROWS*IMG_COLS + 2*i, output, 1);	//length written in bram will be 2 times bigger
+				}
+				else
+				{	
+					write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1); //length written in bram will be 2 times bigger
+				}
+				sum = 0;
 		}
-			
-		delete[] myArray;
-
+/*			
+		//delete[] myArray;
 		if(x_y)
 		{
 			write_bram(STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
@@ -283,7 +324,8 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		{	
 			write_bram(3 * STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
 		}
-		delete[] output;
+*/		
+		//delete[] output;
 		ready = 1;
 
 			
@@ -294,31 +336,72 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 void Ip_hard::write_bram(sc_dt::uint64 addr,short *val,int length)
 {
 	pl_t pl;
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+	//offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
 	
-	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
-	unsigned char *out = static_cast<unsigned char*>(malloc(2 * STRIPE_ROWS * IMG_COLS));
-
-	unsigned char buf[2];
-	for(int i = 0; i < length; i++)
+	int div_four = 0;
+	unsigned char buf1[4];
+	
+	while((2*length) % 4)
 	{
-		shortToUchar(buf,val[i]);
-		out[2*i] = buf[0];
-		out[2*i + 1] = buf[1];
+		length++;
+		div_four += 2;
 	}
 	
+	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
+	unsigned char *out = static_cast<unsigned char*>(malloc(2 * length));
+
+	unsigned char temp[2];
+	for(int i = 0; i < (2*length) - div_four; i+=2)
+	{
+		shortToUchar(temp,val[i/2]);
+		out[i] = temp[0];
+		out[i + 1] = temp[1];
+	}
+/*
 	pl.set_data_length(2*length);
 	pl.set_address(addr);
 	pl.set_data_ptr(out);
 	pl.set_command(tlm::TLM_WRITE_COMMAND);
 	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
 	bram_socket->b_transport(pl,offset);
+*/	
+
+
 	
+  
+    	for(int i = 2*length - div_four; i < 2*length; i++)
+    	{
+    		out[i] = 0;
+    	}
+
+
+   	pl.set_data_length(BUS_WIDTH);
+    
+    	for(int j = 0; j < ((2*length) / 4); j++)
+    	{
+    		int l = 0;
+    	
+    		for(int p = 4 * j; p < 4 + j * 4; p++)
+    		{
+    			buf1[l] = out[p];
+    			l++;
+    		}
+  
+		pl.set_address(VP_ADDR_BRAM_L + addr + j * 4);
+		pl.set_data_ptr(buf1);
+		pl.set_command(tlm::TLM_WRITE_COMMAND);
+		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+		bram_socket->b_transport(pl,offset);
+		
+    	}
+
 	delete[] out;
 }
 
 void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 {
+/*
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	pl_t pl;
 	
@@ -338,6 +421,54 @@ void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	}
 	
 	delete[] buf;
+*/
+
+	pl_t pl;
+
+	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
+	
+	unsigned char buf1[4];
+	int div_four = 4;
+	
+	//unsigned char *buf = new unsigned char[length];
+	
+	while(length % 4)
+	{
+		length++;
+		div_four--;
+	}
+	
+	pl.set_data_length(BUS_WIDTH);
+	
+	for(int i = 0; i < length / 4; i++)
+	{
+		pl.set_address(VP_ADDR_BRAM_L + addr + i * 4);
+		pl.set_data_ptr(buf1);
+		pl.set_command(tlm::TLM_READ_COMMAND);
+		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+		bram_socket->b_transport(pl,offset);
+		
+		int l = 0;
+		
+		if(i * 4 == (length - 4))
+		{
+			for(int p = 4 * i; p < div_four + i * 4; p++)
+    			{
+    				val[p] = buf1[l];
+    				l++;
+    			}
+		}
+		else
+		{
+			for(int p = 4 * i; p < 4 + i * 4; p++)
+    			{
+    				val[p] = buf1[l];
+    				l++;
+    			}
+    			
+		}
+	}
+
 }
 
 
