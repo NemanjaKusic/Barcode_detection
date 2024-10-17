@@ -1,4 +1,5 @@
 #include "soft.hpp"
+#include <chrono>
 
 int argc;
 char** data;
@@ -264,11 +265,12 @@ void Soft::soft()
 	
 	cout << endl << "while(!done) loop exited" << endl;
 	
+
+	cout << endl << "offset is: " << offset << endl;
 	
-	
-	
-	
-	
+	double offset_in_seconds = offset.to_seconds();
+	double framerate = 1 / offset_in_seconds;
+	cout << endl << "framerate is: " << framerate << endl;
 	
 	
 	/*

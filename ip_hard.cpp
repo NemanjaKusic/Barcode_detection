@@ -1,5 +1,12 @@
 #include "ip_hard.hpp"
 
+using namespace sc_core;
+using namespace sc_dt;
+using namespace std;
+using namespace tlm;
+
+SC_HAS_PROCESS(Ip_hard);
+
 Ip_hard::Ip_hard(sc_core::sc_module_name name): sc_module(name), ready(1)
 {
 	interconnect_socket.register_b_transport(this, &Ip_hard::b_transport);
@@ -71,7 +78,8 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 }
 
-void Ip_hard::sobel_function(sc_core::sc_time &){
+void Ip_hard::sobel_function(sc_core::sc_time &offset){
+
 
 	if(start == 1 && ready == 1)
 	{
@@ -100,146 +108,149 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		delete[] myArray;
 		*/
 		
-		unsigned char *myArray = new unsigned char[STRIPE_ROWS * IMG_COLS];
-		read_bram(0, myArray, STRIPE_ROWS*IMG_COLS);
+		unsigned char *BramArray = new unsigned char[STRIPE_ROWS * IMG_COLS];
+		read_bram(0, BramArray, STRIPE_ROWS*IMG_COLS);
 		
-		short *output = new short[STRIPE_ROWS * IMG_COLS];
-		//short output[1];
+		//short *output = new short[STRIPE_ROWS * IMG_COLS];
+		short output[1];
 		
 		int pos = 0;
 		short sum = 0;
-/*
-		char kernel1[3][3] = {
-		{-3, 0, 3},
-		{-10, 0 ,10},
-		{-3, 0, 3}
-		};
 
-		char kernel2[3][3] = {
-		{-3, -10 ,-3},
-		{0, 0, 0},
-		{3, 10, 3}
-		};
-*/
 		short kernel1[9] = {-3, 0, 3, -10, 0, 10, -3, 0, 3};
 		short kernel2[9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3};
 		
 		short const1[9] = {-601, -600, -599, -1, 0, 1, 599, 600, 601}; 
-/*
-		unsigned char slucaj_1 = 0;
-		unsigned char slucaj_2 = 0;
-		unsigned char slucaj_3 = 0;
-		unsigned char slucaj_4 = 0;
-*/		
+		
 		unsigned char case_1 = 0;
 		unsigned char case_2 = 0;
-
-		int addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8, addr9;
-		short res0, res1, res2, res3, res4, res5, res6, res7, res8, res9;
-
-		//unsigned char pixels1[4]; 
-		//unsigned char pixels2[4];
-		//unsigned char pixels3[4];
 		
-		
-/*
-		for (int i = 0; i < STRIPE_ROWS; i++)//loop for rows// 
-		{
-		        for (int j = 0; j < IMG_COLS; j++)//loop for columns// 
-		        {
-				for(int h = 0; h < 3; h++)
-				{
-					for(int k = 0; k < 3; k++)
-					{
-						if((i+h-1) < 0)
-						{
-							i += 2*IMG_COLS;
-							slucaj_1 = 1;
-						}
-						if((j+k-1) < 0)
-						{
-							j += 2;
-							slucaj_2 = 1;
-						}
-						if((i+h-1) >= STRIPE_ROWS)
-						{
-							i -= 2*IMG_COLS;
-							slucaj_3 = 1;
-						}
-						if((j+k-1) >= IMG_COLS)
-						{
-							j -= 2;
-							slucaj_4 = 1;
-						}
-						if(x_y){
-							pos = (h-1) * IMG_COLS;
-							sum += ((short)myArray[(i*IMG_COLS+j) + pos + (k-1)] * (short)kernel1[h][k]);
-							//sum += ((short)slika.at<uchar>(i+h-1,j+k-1) * (short)kernel_1[h][k]);
-						}
-						else
-						{	
-							pos = (h-1) * IMG_COLS;
-							sum += ((short)myArray[(i*IMG_COLS+j) + pos + (k-1)] * (short)kernel2[h][k]);
-							//sum += ((short)slika.at<uchar>(i+h-1,j+k-1) * (short)kernel_2[h][k]);
-						}
-						if(slucaj_1)
-						{
-							i -= 2*IMG_COLS;
-							slucaj_1 = 0;
-						}					
-						if(slucaj_2)
-						{
-							j -= 2;
-							slucaj_2 = 0;
-						}
-						if(slucaj_3)
-		                                {
-		                                        i += 2*IMG_COLS;
-		                                        slucaj_3 = 0;
-		                                }
-						if(slucaj_4)
-		                                {
-		                                        j += 2;
-		                                        slucaj_4 = 0;
-		                                }
+		//res4 will allways be 0 so it wont affect sum
+		int addr;
+		short res;
+		short ker0, ker1, ker2, ker3, ker5, ker6, ker7, ker8;
+		unsigned char pixel; 
 
-					}
-				}
-		               	//x = (float)slika_pikseli.at<float>(i, j);//storing value of (i,j) pixel in variable//
-		               	//cout << "Value of pixel" << "(" << i << "," << j << ")" << "=" << x << endl;//showing the values in console window//	
-
-*/		               	
+		               	
 		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
 		{
-		        
+		        	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);     //for i++
+		        	
+		        	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);     //for next 2 if in parallel
 				if(i < 601)
 				{
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i += 2 * IMG_COLS;
 					case_1 = 1;
 				}
 				if((i + 601) > (STRIPE_ROWS * IMG_COLS))
-				{
+				{	
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i -= 2 * IMG_COLS;
 					case_2 = 1;
 				}
-				/*
+				
+				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+				if(x_y)
+				{
 					//in parallel
-					addr1 = i + const1[0];
-					//addr2 = i + const1[1];
-					//addr3 = i + const1[2];
-					addr4 = i + const1[3];
-					//addr5 = i + const1[4];
-					//addr6 = i + const1[5];
-					addr7 = i + const1[6];
-					//addr8 = i + const1[7];
-					//addr9 = i + const1[8];
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					ker0 = kernel1[0];
+					ker1 = kernel1[1];
+					ker2 = kernel1[2];
+					ker3 = kernel1[3];
+					ker5 = kernel1[5];
+					ker6 = kernel1[6];
+					ker7 = kernel1[7];
+					ker8 = kernel1[8];
+				}
+				else
+				{
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					ker0 = kernel2[0];
+					ker1 = kernel2[1];
+					ker2 = kernel2[2];
+					ker3 = kernel2[3];
+					ker5 = kernel2[5];
+					ker6 = kernel2[6];
+					ker7 = kernel2[7];
+					ker8 = kernel2[8];
+				}
+				
+
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					addr = i + const1[0];
 					
-				read_bram(addr1, pixels1, 4);
-				read_bram(addr4, pixels2, 4);
-				read_bram(addr7, pixels3, 4);
-				*/
 					//in parallel
-					addr1 = i + const1[0];
+					//read from bram is 2 clk cycles
+					offset += sc_core::sc_time(2 * DELAY, sc_core::SC_NS);
+					pixel = BramArray[addr];
+					addr = i + const1[1];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					res = short(pixel) * short(ker0); 
+					pixel = BramArray[addr];
+					addr = i + const1[2];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker1); 
+					pixel = BramArray[addr];
+					addr = i + const1[3];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker2); 
+					pixel = BramArray[addr];
+					addr = i + const1[5];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker3); 
+					pixel = BramArray[addr];
+					addr = i + const1[6];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker5); 
+					pixel = BramArray[addr];
+					addr = i + const1[7];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker6); 
+					pixel = BramArray[addr];
+					addr = i + const1[8];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker7); 
+					pixel = BramArray[addr];
+					//addr = i + const1[8];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					res = short(pixel) * short(ker8); 
+					//pixel = myArray[addr];
+					//addr = i + const1[8];
+					
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					sum += res;
+					
+				/*	
 					addr2 = i + const1[1];
 					addr3 = i + const1[2];
 					addr4 = i + const1[3];
@@ -261,18 +272,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 					res7 = ((short)myArray[addr7] * (short)kernel1[6]);
 					res8 = ((short)myArray[addr8] * (short)kernel1[7]);
 					res9 = ((short)myArray[addr9] * (short)kernel1[8]);
-				/*	
-					//in parallel
-					res1 = ((short)pixels1[0] * (short)kernel1[0]);
-					res2 = ((short)pixels1[1] * (short)kernel1[1]);
-					res3 = ((short)pixels1[2] * (short)kernel1[2]);
-					res4 = ((short)pixels2[0] * (short)kernel1[3]);
-					//res5 = ((short)pixels2[1] * (short)kernel1[4]);
-					res6 = ((short)pixels2[2] * (short)kernel1[5]);
-					res7 = ((short)pixels3[0] * (short)kernel1[6]);
-					res8 = ((short)pixels3[1] * (short)kernel1[7]);
-					res9 = ((short)pixels3[2] * (short)kernel1[8]);
-				*/	
+	
 				}
 				else
 				{	
@@ -287,49 +287,47 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 					res7 = ((short)myArray[addr7] * (short)kernel2[6]);
 					res8 = ((short)myArray[addr8] * (short)kernel2[7]);
 					res9 = ((short)myArray[addr9] * (short)kernel2[8]);
-				/*
-					//in parallel
-					res1 = ((short)pixels1[0] * (short)kernel2[0]);
-					res2 = ((short)pixels1[1] * (short)kernel2[1]);
-					res3 = ((short)pixels1[2] * (short)kernel2[2]);
-					res4 = ((short)pixels2[0] * (short)kernel2[3]);
-					//res5 = ((short)pixels2[1] * (short)kernel2[4]);
-					res6 = ((short)pixels2[2] * (short)kernel2[5]);
-					res7 = ((short)pixels3[0] * (short)kernel2[6]);
-					res8 = ((short)pixels3[1] * (short)kernel2[7]);
-					res9 = ((short)pixels3[2] * (short)kernel2[8]);
-				*/
+
 				}
+				
 					sum = ((res1+res2)+(res3+res4))+((res6+res7)+(res8+res9));	//res5 = 0
-					
+				*/	
+				
+				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//for next 2 if in parallel
 				if(case_1)
 				{
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i -= 2 * IMG_COLS;
 					case_1 = 0;
 				}					
 				if(case_2)
 				{
+					//in parallel
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i += 2 * IMG_COLS;
 					case_2 = 0;
 				}
 			
-			/*
+				//in parallel
+				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 				output[0] = sum;
 				if(x_y)
 				{
-					write_bram(STRIPE_ROWS*IMG_COLS + 2*i, output, 1);	//length written in bram will be 2 times bigger
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//one delay for addr, two for writing in b_transport
+					write_bram(STRIPE_ROWS*IMG_COLS + 2*i, output, 1);
 				}
 				else
 				{	
-					write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1); //length written in bram will be 2 times bigger
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//one delay for addr, two for writing in b_transport
+					write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1);		
 				}
+				
+				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 				sum = 0;
-			*/
-			output[i] = sum;
-			sum = 0;
 		}
-			
-		//delete[] myArray;
+/*	
+		
 		if(x_y)
 		{
 			write_bram(STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
@@ -338,10 +336,11 @@ void Ip_hard::sobel_function(sc_core::sc_time &){
 		{	
 			write_bram(3 * STRIPE_ROWS*IMG_COLS, output, STRIPE_ROWS*IMG_COLS);
 		}
-		
-		delete[] output;
+*/		
+		//delete[] output;
+		delete[] BramArray;
 		ready = 1;
-
+		
 			
 		cout << "sobel function finished" << endl;
 	}
