@@ -17,7 +17,7 @@
 //bram size is 270KB
 #define BRAM_SIZE 0x41EB0
 
-#define BUS_WIDTH 4
+#define BUS_WIDTH 32
 
 //registers in ip_hard
 #define ADDR_START 0x00

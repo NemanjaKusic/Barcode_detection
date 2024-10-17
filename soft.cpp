@@ -454,25 +454,25 @@ void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
 
 	pl_t pl;
 
-	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
+	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
 	
-	int div_four = 0;
-	unsigned char buf1[4];
+	int div_32 = 0;
+	unsigned char buf1[32];
 	
-	while(length % 4)
+	while(length % 32)
 	{
 		length++;
-		div_four ++;
+		div_32++;
 	}
 
 	unsigned char *buf = new unsigned char[length];
 	
-	for(int i = 0; i < length - div_four; i++)
+	for(int i = 0; i < length - div_32; i++)
 	{
     		buf[i] = val[i];
    	}
   
-    	for(int i = length - div_four; i < length; i++)
+    	for(int i = length - div_32; i < length; i++)
     	{
     		buf[i] = 0;
     	}
@@ -480,17 +480,17 @@ void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
 
    	 pl.set_data_length(BUS_WIDTH);
     
-    	for(int j = 0; j < length / 4; j++)
+    	for(int j = 0; j < length / 32; j++)
     	{
     		int l = 0;
     	
-    		for(int p = 4 * j; p < 4 + j *4; p++)
+    		for(int p = 32 * j; p < 32 + j * 32; p++)
     		{
     			buf1[l] = buf[p];
     			l++;
     		}
   
-		pl.set_address(VP_ADDR_BRAM_L + addr + j * 4);
+		pl.set_address(VP_ADDR_BRAM_L + addr + j * 32);
 		pl.set_data_ptr(buf1);
 		pl.set_command(tlm::TLM_WRITE_COMMAND);
 		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
@@ -525,24 +525,24 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 */
 	pl_t pl;
 
-	offset += sc_core::sc_time(11 * DELAY , sc_core::SC_NS);
+	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
 	
-	unsigned char buf1[4];
-	int div_four = 4;
+	unsigned char buf1[32];
+	int div_32 = 32;
 	
 	//unsigned char *buf = new unsigned char[length];
 	
-	while(length % 4)
+	while(length % 32)
 	{
 		length++;
-		div_four--;
+		div_32--;
 	}
 	
 	pl.set_data_length(BUS_WIDTH);
 	
-	for(int i = 0; i < length / 4; i++)
+	for(int i = 0; i < length / 32; i++)
 	{
-		pl.set_address(VP_ADDR_BRAM_L + addr + i * 4);
+		pl.set_address(VP_ADDR_BRAM_L + addr + i * 32);
 		pl.set_data_ptr(buf1);
 		pl.set_command(tlm::TLM_READ_COMMAND);
 		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
@@ -550,9 +550,9 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 		
 		int l = 0;
 		
-		if(i * 4 == (length - 4))
+		if(i * 32 == (length - 32))
 		{
-			for(int p = 4 * i; p < div_four + i * 4; p++)
+			for(int p = 32 * i; p < div_32 + i * 32; p++)
     			{
     				val[p] = buf1[l];
     				l++;
@@ -560,7 +560,7 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 		}
 		else
 		{
-			for(int p = 4 * i; p < 4 + i * 4; p++)
+			for(int p = 32 * i; p < 32 + i * 32; p++)
     			{
     				val[p] = buf1[l];
     				l++;
