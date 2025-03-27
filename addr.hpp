@@ -7,7 +7,7 @@
 typedef tlm::tlm_base_protocol_types::tlm_payload_type pl_t;
 typedef tlm::tlm_base_protocol_types::tlm_phase_type ph_t;
 
-#define DELAY 10
+#define DELAY 6
 
 #define IMG_COLS 600
 #define IMG_ROWS 450
