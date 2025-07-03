@@ -302,6 +302,7 @@ void Soft::soft()
 		for (int k = 0; k < IMG_COLS; k++)
 		{
 			gradX.at<short>(j,k) = response_img_1[j * IMG_COLS + k];
+			std::cout << gradX.at<short>(j,k) << " ";  // Convert to int for proper printing
 		}
 	}
 	

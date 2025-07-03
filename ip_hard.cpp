@@ -120,16 +120,17 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 		short kernel1[9] = {-3, 0, 3, -10, 0, 10, -3, 0, 3};
 		short kernel2[9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3};
 		
-		short const1[9] = {-601, -600, -599, -1, 0, 1, 599, 600, 601}; 
+		short const1[9] = {-601, -600, -599, -1, 1, 599, 600, 601}; 
 		
 		unsigned char case_1 = 0;
 		unsigned char case_2 = 0;
 		
 		//res4 will allways be 0 so it wont affect sum
-		int addr;
-		short res;
-		short ker0, ker1, ker2, ker3, ker5, ker6, ker7, ker8;
-		unsigned char pixel; 
+		int addr = 0;
+		short res = 0;
+		//short ker0, ker1, ker2, ker3, ker5, ker6, ker7, ker8;
+		short ker[8];
+		unsigned char pixel = 0; 
 
 		               	
 		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
@@ -157,30 +158,70 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				{
 					//in parallel
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
-					ker0 = kernel1[0];
-					ker1 = kernel1[1];
-					ker2 = kernel1[2];
-					ker3 = kernel1[3];
-					ker5 = kernel1[5];
-					ker6 = kernel1[6];
-					ker7 = kernel1[7];
-					ker8 = kernel1[8];
+					ker[0] = kernel1[0];
+					ker[1] = kernel1[1];
+					ker[2] = kernel1[2];
+					ker[3] = kernel1[3];
+					ker[4] = kernel1[5];
+					ker[5] = kernel1[6];
+					ker[6] = kernel1[7];
+					ker[7] = kernel1[8];
 				}
 				else
 				{
 					//in parallel
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
-					ker0 = kernel2[0];
-					ker1 = kernel2[1];
-					ker2 = kernel2[2];
-					ker3 = kernel2[3];
-					ker5 = kernel2[5];
-					ker6 = kernel2[6];
-					ker7 = kernel2[7];
-					ker8 = kernel2[8];
+					ker[0] = kernel2[0];
+					ker[1] = kernel2[1];
+					ker[2] = kernel2[2];
+					ker[3] = kernel2[3];
+					ker[4] = kernel2[5];
+					ker[5] = kernel2[6];
+					ker[6] = kernel2[7];
+					ker[7] = kernel2[8];
 				}
 				
+				unsigned char j=0;
+				
+				j_petlja: offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+				if(j > 2)
+				{
+					sum += res;						
+				}
+				res = short(pixel) * short(ker[j-2]);
+				pixel = BramArray[addr];
+				addr = i + const1[j];
+				j++;
+				
+				if(j<10)
+				{
+					goto j_petlja;
+				}
+				else
+				{
+					goto kraj;
+				}
+				
+				kraj: offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+				sum += res;
+/*				
 
+				for(unsigned char j=0; j<10; j++)
+				{
+					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+					if(j > 2)
+					{
+						sum += res;						
+					}
+					res = short(pixel) * short(ker[j-2]);
+					pixel = BramArray[addr];
+					addr = i + const1[j];
+				}
+				
+				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+				sum += res;
+*/
+/*
 					//in parallel
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					addr = i + const1[0];
@@ -249,7 +290,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 					//in parallel
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					sum += res;
-					
+*/					
 				/*	
 					addr2 = i + const1[1];
 					addr3 = i + const1[2];
