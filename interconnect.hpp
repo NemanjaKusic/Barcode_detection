@@ -20,6 +20,7 @@ class Interconnect : public sc_core::sc_module
 		~Interconnect();
 		
 		tlm_utils::simple_initiator_socket<Interconnect> bram_socket;
+		tlm_utils::simple_initiator_socket<Interconnect> bram2_socket;
 		tlm_utils::simple_initiator_socket<Interconnect> ip_hard_socket;
 		tlm_utils::simple_target_socket<Interconnect> soft_socket;
 		

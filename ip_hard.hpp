@@ -19,7 +19,7 @@ class Ip_hard : public sc_core::sc_module
 	
 		tlm_utils::simple_target_socket<Ip_hard> interconnect_socket;
 		tlm_utils::simple_initiator_socket<Ip_hard> bram_socket;
-		
+		tlm_utils::simple_initiator_socket<Ip_hard> bram2_socket;
 
 		
 	protected:
@@ -38,6 +38,8 @@ class Ip_hard : public sc_core::sc_module
 	
 		void write_bram(sc_dt::uint64 addr,short *val,int length);
 		void read_bram(sc_dt::uint64 addr, unsigned char *val, int length);
+		
+		void write_bram2(sc_dt::uint64 addr,short *val,int length);
 	
 };
 

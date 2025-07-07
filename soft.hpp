@@ -36,6 +36,7 @@ class Soft : public sc_core::sc_module
 		void soft();
 		void write_bram(sc_dt::uint64 addr,unsigned char *val,int length);
 		void read_bram(sc_dt::uint64 addr, unsigned char *val, int length);
+		void read_bram2(sc_dt::uint64 addr, short *val, int length);
 		int read_hard(sc_dt::uint64 addr);
 	    	void write_hard(sc_dt::uint64 addr,int val);
 };

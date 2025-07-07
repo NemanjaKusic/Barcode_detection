@@ -8,6 +8,7 @@
 #include "interconnect.hpp"
 #include "ip_hard.hpp"
 #include "bram.hpp"
+#include "bram2.hpp"
 
 class Vp :  public sc_core::sc_module
 {
@@ -19,7 +20,8 @@ class Vp :  public sc_core::sc_module
 		Soft soft;
 		Interconnect interconnect;
 		Ip_hard ip_hard;
-		Bram bram;		
+		Bram bram;
+		Bram2 bram2;		
 };
 
 

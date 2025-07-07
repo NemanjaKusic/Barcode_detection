@@ -182,13 +182,13 @@ void Soft::soft()
 		        	//x_y = !x_y;
 		        }
 		}
-		
+/*		
 		//later on if(x_y && last stripe)
 		if(!x_y && stripe == 5)
 		{
 			done = 1;
 		}
-		
+*/		
 		ready = read_hard(ADDR_READY);
 		
 		if(ready)
@@ -196,7 +196,7 @@ void Soft::soft()
 			if(x_y)
 			{
 				x_y = !x_y;	
-	
+/*	
 				read_bram(STRIPE_ROWS * IMG_COLS, response_stripe_1, 2 * STRIPE_ROWS * IMG_COLS);
 				
 				
@@ -205,8 +205,8 @@ void Soft::soft()
 				{
 					short_response_stripe_1[i] = (static_cast<signed short>(response_stripe_1[2*i]) << 8) | response_stripe_1[2*i + 1];
 				}
-				
-				
+*/				
+				read_bram2(0, short_response_stripe_1, STRIPE_ROWS * IMG_COLS);
 				
 				for(int i = 0; i < STRIPE_ROWS; i++)
 				{
@@ -222,17 +222,17 @@ void Soft::soft()
 			else if(!x_y)
 			{
 				x_y = !x_y;
-
+/*
 				read_bram(3 * STRIPE_ROWS * IMG_COLS, response_stripe_2, 2 * STRIPE_ROWS * IMG_COLS);
 				
-
+				
 				
 				for(int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)
 				{
 					short_response_stripe_2[i] = (static_cast<signed short>(response_stripe_2[2*i]) << 8) | response_stripe_2[2*i + 1];
 				}
-				
-				
+*/				
+				read_bram2(STRIPE_ROWS * IMG_COLS, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
 				
 				for(int i = 0; i < STRIPE_ROWS; i++)
 				{
@@ -248,9 +248,12 @@ void Soft::soft()
 			}			
 		}
 		
-		cout << endl << "while(ready) loop exited" << endl;
+		//cout << endl << "while(ready) loop exited" << endl;
 			
-		
+		if(stripe == 6)
+		{
+			done = 1;
+		}
 		
 	}
 
@@ -302,7 +305,7 @@ void Soft::soft()
 		for (int k = 0; k < IMG_COLS; k++)
 		{
 			gradX.at<short>(j,k) = response_img_1[j * IMG_COLS + k];
-			std::cout << gradX.at<short>(j,k) << " ";  // Convert to int for proper printing
+			//std::cout << gradX.at<short>(j,k) << " ";  // Convert to int for proper printing
 		}
 	}
 	
@@ -577,6 +580,70 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 	
 	
 	
+}
+
+void Soft::read_bram2(sc_dt::uint64 addr, short *val, int length)
+{
+
+	pl_t pl;
+
+	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	
+	//unsigned char buf1[32];
+	
+	int div_32 = 32;
+	int real_length = 2 * length;
+	//unsigned char *buf = new unsigned char[length];
+	
+	while(real_length % 32)
+	{
+		real_length++;
+		div_32--;
+	}
+		
+	int pos = 0;
+	
+	for(int i = 0; i < real_length / 32; i++)
+	{
+		unsigned char *buf1 = new unsigned char[32];
+		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+		
+		pl.set_data_length(32);
+		pl.set_address(VP_ADDR_BRAM2_L + addr + i * 16);
+		pl.set_data_ptr(buf1);
+		pl.set_command(tlm::TLM_READ_COMMAND);
+		pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+		interconnect_socket->b_transport(pl,offset);
+
+		int limit = (i * 32 == real_length - 32) ? div_32 : 32;
+
+		for (int l = 0; l < limit; l += 2) {
+			val[pos++] = (static_cast<short>(buf1[l]) << 8) | buf1[l + 1];
+		}
+		delete[] buf1;
+	}
+	
+/*
+	pl_t pl;
+
+	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	
+	unsigned char *buf = new unsigned char[2 * length];
+	
+	pl.set_data_length(2 * length);
+	pl.set_address(VP_ADDR_BRAM2_L + addr);
+	pl.set_data_ptr(buf);
+	pl.set_command(tlm::TLM_READ_COMMAND);
+	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+	interconnect_socket->b_transport(pl,offset);
+	
+	for (unsigned int i = 0; i < 2*length; i+=2)
+	{
+		val[i/2] = (static_cast<signed short>(buf[i]) << 8) | buf[i + 1];
+	}
+	
+	delete[] buf;
+*/
 }
 
 void Soft::write_hard(sc_dt::uint64 addr,int val)

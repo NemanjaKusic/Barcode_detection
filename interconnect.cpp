@@ -26,6 +26,14 @@ void Interconnect::b_transport(pl_t &pl, sc_core::sc_time &offset)
 		bram_socket->b_transport(pl, offset);
 		pl.set_address(addr);
 	}
+	else if (addr >= VP_ADDR_BRAM2_L && addr <= VP_ADDR_BRAM2_H)
+	{
+		pl.set_address(temp_addr);
+		//offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+		//SC_REPORT_INFO("Interconnect", "Sent to bram.");
+		bram2_socket->b_transport(pl, offset);
+		pl.set_address(addr);
+	}
 	else if (addr >= VP_ADDR_IP_HARD_L && addr <= VP_ADDR_IP_HARD_H)
 	{
 		pl.set_address(temp_addr);

@@ -356,12 +356,15 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				if(x_y)
 				{
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//one delay for addr, two for writing in b_transport
-					write_bram(STRIPE_ROWS*IMG_COLS + 2*i, output, 1);
+					//write_bram(STRIPE_ROWS*IMG_COLS + 2*i, output, 1);
+					write_bram2(i, output, 1);
+					
 				}
 				else
 				{	
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//one delay for addr, two for writing in b_transport
-					write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1);		
+					//write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1);
+					write_bram2(STRIPE_ROWS*IMG_COLS + i, output, 1);		
 				}
 				
 				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
@@ -542,4 +545,31 @@ void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 */
 }
 
+void Ip_hard::write_bram2(sc_dt::uint64 addr,short *val,int length)
+{
+	pl_t pl;
+	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+	
+	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
+	unsigned char *out = new unsigned char[2 * length];
+	//unsigned char *out = static_cast<unsigned char*>(malloc(2 * length));
+
+	unsigned char buf[2];
+	for(int i = 0; i < length; i++)
+	{
+		shortToUchar(buf,val[i]);
+		out[2*i] = buf[0];
+		out[2*i + 1] = buf[1];
+	}
+	
+	pl.set_data_length(2*length);
+	pl.set_address(addr);
+	pl.set_data_ptr(out);
+	pl.set_command(tlm::TLM_WRITE_COMMAND);
+	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
+	bram2_socket->b_transport(pl,offset);
+	
+	delete[] out;
+	
+}
 
