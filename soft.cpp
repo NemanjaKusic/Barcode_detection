@@ -49,9 +49,9 @@ void Soft::soft()
 	Mat gray;
 	cvtColor(image, gray, COLOR_BGR2GRAY);
 	
-	// Resize the image to 600x450
+	// Resize the image to 600x452
 	Mat resizedGray;
-	resize(gray, resizedGray, cv::Size(600, 450));
+	resize(gray, resizedGray, cv::Size(600, 452));
 	
 	imshow("resizedGray", resizedGray);
 	waitKey(0);
@@ -232,7 +232,8 @@ void Soft::soft()
 					short_response_stripe_2[i] = (static_cast<signed short>(response_stripe_2[2*i]) << 8) | response_stripe_2[2*i + 1];
 				}
 */				
-				read_bram2(STRIPE_ROWS * IMG_COLS, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
+				//read_bram2(STRIPE_ROWS * IMG_COLS, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
+				read_bram2(0, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
 				
 				for(int i = 0; i < STRIPE_ROWS; i++)
 				{
@@ -242,7 +243,7 @@ void Soft::soft()
 					}
 				}
 				
-				cout << endl << "stripe: " << stripe << " done" << endl; 
+				cout << endl << "stripe: " << stripe + 1 << " done" << endl; 
 				
 				stripe++;
 			}			
@@ -250,7 +251,7 @@ void Soft::soft()
 		
 		//cout << endl << "while(ready) loop exited" << endl;
 			
-		if(stripe == 6)
+		if(stripe == 4)
 		{
 			done = 1;
 		}
@@ -360,7 +361,7 @@ void Soft::soft()
         
        
         //subtract gradY form gradX
-	Mat gradient(450, 600, CV_32F);
+	Mat gradient(452, 600, CV_32F);
 	subtract(gradY, gradX, gradient);
 
 	imshow("gradient", gradient);

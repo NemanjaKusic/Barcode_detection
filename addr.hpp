@@ -10,15 +10,16 @@ typedef tlm::tlm_base_protocol_types::tlm_phase_type ph_t;
 #define DELAY 6
 
 #define IMG_COLS 600
-#define IMG_ROWS 450
+#define IMG_ROWS 452
 #define STRIPE_COLS 600
-#define STRIPE_ROWS 75 
+#define STRIPE_ROWS 113 
 
 //bram size is 1.5MB for now 
 //#define BRAM_SIZE 0x16E360 
 
-//bram size is 270KB
-#define BRAM_SIZE 0x41EB0
+//bram1 size is STRIPE_COLS * STRIPE_ROWS + BUS_WIDTH = 67832KB
+//bram2 size is bram1 * 2 = 135664KB
+#define BRAM_SIZE 0x108F8
 
 #define BUS_WIDTH 32
 

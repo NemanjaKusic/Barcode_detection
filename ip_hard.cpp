@@ -353,6 +353,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				//in parallel
 				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 				output[0] = sum;
+/*
 				if(x_y)
 				{
 					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);	//one delay for addr, two for writing in b_transport
@@ -366,7 +367,9 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 					//write_bram(3 * STRIPE_ROWS*IMG_COLS + 2*i, output, 1);
 					write_bram2(STRIPE_ROWS*IMG_COLS + i, output, 1);		
 				}
-				
+*/
+				write_bram2(i, output, 1);			
+								
 				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 				sum = 0;
 		}
