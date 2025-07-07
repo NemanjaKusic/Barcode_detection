@@ -39,8 +39,7 @@ void Soft::soft()
 {
 
 
-	//load picture
-	//Mat image = imread("../data/barcode_3b.jpg");	
+	//load picture	
 	Mat image = imread(data[1], IMREAD_COLOR);
 
 	SC_REPORT_INFO("CPU", "Loaded image from file.");
@@ -56,68 +55,7 @@ void Soft::soft()
 	imshow("resizedGray", resizedGray);
 	waitKey(0);
 	
-	/*
-	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
-		   				
-			for (int j = 0; j < IMG_ROWS; j++)
-			{
-				for (int k = 0; k < IMG_COLS; k++)
-				{
-					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
-				}
-			}
-			
-			//Write image in bram 
-			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
-			
-			cout << "array of pixels of an image:" << endl;
-			
-			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
-			{
-        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
-			}
-			delete[] img;
-	*/
-	/*
-	unsigned char *img = new unsigned char[IMG_ROWS * IMG_COLS];
-		   				
-			for (int j = 0; j < IMG_ROWS; j++)
-			{
-				for (int k = 0; k < IMG_COLS; k++)
-				{
-					img[j * IMG_COLS + k]= resizedGray.at<unsigned char>(j,k);
-				}
-			}
-			
-			//Write image in bram 
-			write_bram(VP_ADDR_BRAM_L, img, IMG_ROWS * IMG_COLS);
-			
-			cout << "array of pixels of an image:" << endl;
-			
-			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
-			{
-        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
-			}
-			delete[] img;
-			
-			cout << endl;
-			write_hard(ADDR_START,1);
-			
-			
-			unsigned char *response_img = new unsigned char[IMG_ROWS * IMG_COLS];
-			
-			
-			//cout << endl << "ovde se pojavi segmentation fault" << endl;
-			read_bram(IMG_ROWS * IMG_COLS, response_img, IMG_ROWS * IMG_COLS);
 	
-			cout << "array of pixels of response_img:" << endl;
-			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
-			{
-        			std::cout << static_cast<int>(response_img[i]) << " ";  // Convert to int for proper printing
-			}
-	
-			delete[] response_img;
-	*/
 
 	int ready = 1;
 	bool done = 0;
@@ -150,13 +88,6 @@ void Soft::soft()
 			//Write image in bram 
 			write_bram(VP_ADDR_BRAM_L, img, STRIPE_ROWS * IMG_COLS);
 			
-			cout << "array of pixels of an image:" << endl;
-			/*
-			for (int i = 0; i < IMG_ROWS * IMG_COLS; ++i) 
-			{
-        			std::cout << static_cast<int>(img[i]) << " ";  // Convert to int for proper printing
-			}
-			*/
 			delete[] img;
 			
 			
@@ -179,16 +110,10 @@ void Soft::soft()
 					write_hard(ADDR_X_Y, 0);
 		        		write_hard(ADDR_START,0);		        		
 		        	}
-		        	//x_y = !x_y;
+		        	
 		        }
 		}
-/*		
-		//later on if(x_y && last stripe)
-		if(!x_y && stripe == 5)
-		{
-			done = 1;
-		}
-*/		
+		
 		ready = read_hard(ADDR_READY);
 		
 		if(ready)
@@ -196,16 +121,7 @@ void Soft::soft()
 			if(x_y)
 			{
 				x_y = !x_y;	
-/*	
-				read_bram(STRIPE_ROWS * IMG_COLS, response_stripe_1, 2 * STRIPE_ROWS * IMG_COLS);
 				
-				
-				
-				for(int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)
-				{
-					short_response_stripe_1[i] = (static_cast<signed short>(response_stripe_1[2*i]) << 8) | response_stripe_1[2*i + 1];
-				}
-*/				
 				read_bram2(0, short_response_stripe_1, STRIPE_ROWS * IMG_COLS);
 				
 				for(int i = 0; i < STRIPE_ROWS; i++)
@@ -222,16 +138,7 @@ void Soft::soft()
 			else if(!x_y)
 			{
 				x_y = !x_y;
-/*
-				read_bram(3 * STRIPE_ROWS * IMG_COLS, response_stripe_2, 2 * STRIPE_ROWS * IMG_COLS);
-				
-				
-				
-				for(int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)
-				{
-					short_response_stripe_2[i] = (static_cast<signed short>(response_stripe_2[2*i]) << 8) | response_stripe_2[2*i + 1];
-				}
-*/				
+			
 				//read_bram2(STRIPE_ROWS * IMG_COLS, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
 				read_bram2(0, short_response_stripe_2, STRIPE_ROWS * IMG_COLS);
 				
@@ -264,8 +171,6 @@ void Soft::soft()
 	delete[] short_response_stripe_1;
 	delete[] short_response_stripe_2;
 	
-	//delete[] response_img_1;
-	//delete[] response_img_2;
 	
 	cout << endl << "while(!done) loop exited" << endl;
 	
@@ -276,28 +181,7 @@ void Soft::soft()
 	double framerate = 1 / offset_in_seconds;
 	cout << endl << "framerate is: " << framerate << endl;
 	
-	
-	/*
-	unsigned char *response_img_1 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
 
-	read_bram(IMG_ROWS * IMG_COLS, response_img_1, 2 * IMG_ROWS * IMG_COLS);
-	
-	cout << "array of pixels of response_img_1:" << endl;
-	for (int i = 0; i < 2 * IMG_ROWS * IMG_COLS; ++i) 
-	{
-        	std::cout << static_cast<int>(response_img_1[i]) << " ";  // Convert to int for proper printing
-	}
-	*/
-	/*
-	short *short_img_1 = new short[IMG_ROWS * IMG_COLS];
-	
-	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
-	{
-		short_img_1[i] = (static_cast<signed short>(response_img_1[2*i]) << 8) | response_img_1[2*i + 1];
-	}
-	*/
-	
-//ovo treba
 
 	Mat gradX(IMG_ROWS, IMG_COLS, CV_16S);
 	
@@ -313,36 +197,8 @@ void Soft::soft()
 	imshow("gradX", gradX);
 	waitKey(0);
 	
-	//delete[] short_img_1;
         delete[] response_img_1;
-        
-     
-        
-        
-        /*
-        unsigned char *response_img_2 = new unsigned char[2 * IMG_ROWS * IMG_COLS];	
-
-	read_bram(3 * IMG_ROWS * IMG_COLS, response_img_2, 2 * IMG_ROWS * IMG_COLS);
-	
-	cout << "array of pixels of response_img_2:" << endl;
-	for (int i = 0; i < 2 * IMG_ROWS * IMG_COLS; ++i) 
-	{
-        	std::cout << static_cast<int>(response_img_2[i]) << " ";  // Convert to int for proper printing
-	}
-	*/
-	/*
-	short *short_img_2 = new short[IMG_ROWS * IMG_COLS];
-	
-	for(int i = 0; i < IMG_ROWS * IMG_COLS; i++)
-	{
-		short_img_2[i] = (static_cast<signed short>(response_img_2[2*i]) << 8) | response_img_2[2*i + 1];
-	}
-	*/
-
-//ovo treba	
-
-
-	
+             	
 	Mat gradY(IMG_ROWS, IMG_COLS, CV_16S);
 	
 	for (int j = 0; j < IMG_ROWS; j++)
