@@ -304,20 +304,15 @@ void Soft::soft()
 void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
 {
 	
-/*
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
-	
-	pl.set_data_length(length);
-	pl.set_address(addr);
-	pl.set_data_ptr(val);
-	pl.set_command(tlm::TLM_WRITE_COMMAND);
-	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-	interconnect_socket->b_transport(pl,offset);
-*/
 
 	pl_t pl;
 
-	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	//10 * DELAY for each AXI4-FULL burst initial delay
+	offset += sc_core::sc_time((10 * DELAY) * (length / 256) , sc_core::SC_NS);
+	if(length % 256)
+	{
+		offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	}
 	
 	int div_4 = 0;
 	unsigned char buf1[BUS_WIDTH];
@@ -365,30 +360,15 @@ void Soft::write_bram(sc_dt::uint64 addr,unsigned char *val,int length)
     
 void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 {
-/*
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
-	pl_t pl;
-	
-	//unsigned char buf[length];
-	unsigned char *buf = new unsigned char[length];
-	
-	pl.set_address(addr);
-	pl.set_data_length(length);
-	pl.set_data_ptr(buf);
-	pl.set_command(tlm::TLM_READ_COMMAND);
-	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-	interconnect_socket->b_transport(pl,offset);
-	
-	for(int i = 0; i < length; i++)
-	{
-		val[i] = buf[i];
-	}
-	
-	delete[] buf;
-*/
+
 	pl_t pl;
 
-	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	//10 * DELAY for each AXI4-FULL burst initial delay
+	offset += sc_core::sc_time((10 * DELAY) * (length / 256) , sc_core::SC_NS);
+	if(length % 256)
+	{
+		offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
+	}
 	
 	unsigned char buf1[BUS_WIDTH];
 	int div_4 = BUS_WIDTH;
@@ -432,19 +412,13 @@ void Soft::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 		}
 	}
 	
-	//val = buf;
-	//delete[] buf;
-	
-	
-	
+		
 }
 
 void Soft::read_bram2(sc_dt::uint64 addr, short *val, int length)
 {
 
 	pl_t pl;
-
-	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
 	
 	//unsigned char buf1[32];
 	
@@ -460,10 +434,13 @@ void Soft::read_bram2(sc_dt::uint64 addr, short *val, int length)
 		
 	int pos = 0;
 	
+	//10 * DELAY for each AXI4-FULL burst initial delay
+	offset += sc_core::sc_time((10 * DELAY) * (real_length / 256) , sc_core::SC_NS);
+
+	
 	for(int i = 0; i < real_length / BUS_WIDTH; i++)
 	{
 		unsigned char *buf1 = new unsigned char[BUS_WIDTH];
-		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 		
 		pl.set_data_length(BUS_WIDTH);
 		pl.set_address(VP_ADDR_BRAM2_L + addr + i * (BUS_WIDTH/2));
@@ -480,32 +457,15 @@ void Soft::read_bram2(sc_dt::uint64 addr, short *val, int length)
 		delete[] buf1;
 	}
 	
-/*
-	pl_t pl;
-
-	offset += sc_core::sc_time(10 * DELAY , sc_core::SC_NS);
-	
-	unsigned char *buf = new unsigned char[2 * length];
-	
-	pl.set_data_length(2 * length);
-	pl.set_address(VP_ADDR_BRAM2_L + addr);
-	pl.set_data_ptr(buf);
-	pl.set_command(tlm::TLM_READ_COMMAND);
-	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-	interconnect_socket->b_transport(pl,offset);
-	
-	for (unsigned int i = 0; i < 2*length; i+=2)
-	{
-		val[i/2] = (static_cast<signed short>(buf[i]) << 8) | buf[i + 1];
-	}
-	
-	delete[] buf;
-*/
 }
 
 void Soft::write_hard(sc_dt::uint64 addr,int val)
 {
     	pl_t pl;
+    	
+    	//AXI4-LITE is 4 delays
+    	offset += sc_core::sc_time(4 * DELAY , sc_core::SC_NS);
+    	
     	unsigned char buf[4];
     	toUchar(buf,val); 	
     	pl.set_address(VP_ADDR_IP_HARD_L + addr);
@@ -519,13 +479,16 @@ void Soft::write_hard(sc_dt::uint64 addr,int val)
 int Soft::read_hard(sc_dt::uint64 addr)
 {
     	pl_t pl;
+    	
+    	//AXI4-LITE is 4 delays
+    	offset += sc_core::sc_time(4 * DELAY , sc_core::SC_NS);
+    	
     	unsigned char buf[4];
    	pl.set_address(VP_ADDR_IP_HARD_L + addr);
     	pl.set_data_length(1);
     	pl.set_data_ptr(buf);
     	pl.set_command(tlm::TLM_READ_COMMAND);
     	pl.set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-    	sc_core::sc_time offset = sc_core::SC_ZERO_TIME;
     	interconnect_socket->b_transport(pl,offset);
     	return toInt(buf);
 }

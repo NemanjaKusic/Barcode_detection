@@ -114,29 +114,26 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 		//short ker0, ker1, ker2, ker3, ker5, ker6, ker7, ker8;
 		short ker[8];
 		unsigned char pixel = 0; 
-
+		
+		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 		               	
 		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
 		{
-		        	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);     //for i++
 		        	
 		        	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);     //for next 2 if in parallel
 				if(i < 601)
 				{
 					//in parallel
-					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i += 2 * IMG_COLS;
 					case_1 = 1;
 				}
 				if((i + 601) > (STRIPE_ROWS * IMG_COLS))
 				{	
 					//in parallel
-					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i -= 2 * IMG_COLS;
 					case_2 = 1;
 				}
 				
-				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 				if(x_y)
 				{
 					//in parallel
@@ -193,14 +190,12 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				if(case_1)
 				{
 					//in parallel
-					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i -= 2 * IMG_COLS;
 					case_1 = 0;
 				}					
 				if(case_2)
 				{
 					//in parallel
-					offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 					i += 2 * IMG_COLS;
 					case_2 = 0;
 				}
@@ -210,8 +205,7 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				output[0] = sum;
 
 				write_bram2(i, output, 1);			
-								
-				offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
+							
 				sum = 0;
 		}
 		
@@ -228,7 +222,6 @@ void Ip_hard::write_bram(sc_dt::uint64 addr,short *val,int length)
 {
 
 	pl_t pl;
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	
 	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
 	unsigned char *out = static_cast<unsigned char*>(malloc(2 * STRIPE_ROWS * IMG_COLS));
@@ -254,7 +247,6 @@ void Ip_hard::write_bram(sc_dt::uint64 addr,short *val,int length)
 void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 {
 
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	pl_t pl;
 	
 	//unsigned char buf[length];
@@ -279,7 +271,6 @@ void Ip_hard::read_bram(sc_dt::uint64 addr, unsigned char *val, int length)
 void Ip_hard::write_bram2(sc_dt::uint64 addr,short *val,int length)
 {
 	pl_t pl;
-	offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	
 	//unsigned char *out = new unsigned char(2 * IMG_ROWS*IMG_COLS);
 	unsigned char *out = new unsigned char[2 * length];
