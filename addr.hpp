@@ -21,7 +21,8 @@ typedef tlm::tlm_base_protocol_types::tlm_phase_type ph_t;
 //bram2 size is bram1 * 2 = 135664KB
 #define BRAM_SIZE 0x108F8
 
-#define BUS_WIDTH 32
+//Bus width is 32 bits = 4 bytes
+#define BUS_WIDTH 4 
 
 //registers in ip_hard
 #define ADDR_START 0x00
