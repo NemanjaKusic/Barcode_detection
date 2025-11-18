@@ -115,6 +115,8 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 		short ker[8];
 		unsigned char pixel = 0; 
 		
+		short ker_out;
+		
 		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 		               	
 		for (int i = 0; i < STRIPE_ROWS * IMG_COLS; i++)//loop for rows// 
@@ -168,7 +170,9 @@ void Ip_hard::sobel_function(sc_core::sc_time &offset){
 				{
 					sum += res;						
 				}
-				res = short(pixel) * short(ker[j-2]);
+				res = short(pixel) * ker_out;
+				//res = short(pixel) * short(ker[j-2]);
+				ker_out = ker[j-1];
 				pixel = BramArray[addr];
 				addr = i + const1[j];
 				j++;
