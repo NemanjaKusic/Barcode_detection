@@ -81,12 +81,12 @@ void Ip_hard::b_transport(pl_t &pl, sc_core::sc_time &offset)
 void Ip_hard::sobel_function(sc_core::sc_time &offset){
 
 
-	if(start == 1 && ready == 1)
+	if(start == 1 /*&& ready == 1*/)
 	{
 		ready = 0;
 		offset += sc_core::sc_time(DELAY, sc_core::SC_NS);
 	}
-	else if(start == 0 && ready == 0)
+	else if(start == 0 /*&& ready == 0*/)
 	{
 		cout << "sobel function started" << endl;
 		

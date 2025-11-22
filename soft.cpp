@@ -50,7 +50,7 @@ void Soft::soft()
 	
 	// Resize the image to 600x452
 	Mat resizedGray;
-	resize(gray, resizedGray, cv::Size(600, 452));
+	resize(gray, resizedGray, cv::Size(600, 450));
 	
 	imshow("resizedGray", resizedGray);
 	waitKey(0);
@@ -158,7 +158,7 @@ void Soft::soft()
 		
 		//cout << endl << "while(ready) loop exited" << endl;
 			
-		if(stripe == 4)
+		if(stripe == 5)
 		{
 			done = 1;
 		}
